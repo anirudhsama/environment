@@ -81,7 +81,7 @@ reflector --country India,Singapore --protocol https --latest 10 --sort rate --s
 pacman -Su --noconfirm
 # postgresql: client only in practice — never `systemctl enable postgresql`
 # stow: dotfiles; age + 1password-cli (AUR): fnox; bubblewrap/socat: claude sandboxing
-pacman -S --noconfirm --needed base-devel git ufw mosh neovim zellij github-cli mise tailscale ripgrep jq htop unzip curl fish atuin postgresql pgcli fzf fd bat tree uv sentry-cli stow age bubblewrap socat tcpdump
+pacman -S --noconfirm --needed base-devel git ufw mosh neovim zellij github-cli mise tailscale ripgrep jq htop unzip curl rsync fish atuin postgresql pgcli fzf fd bat tree uv sentry-cli stow age bubblewrap socat tcpdump
 
 systemctl enable --now tailscaled
 systemctl restart sshd
