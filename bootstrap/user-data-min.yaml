@@ -1,0 +1,13 @@
+#cloud-config
+hostname: devbox
+timezone: Asia/Kolkata
+users:
+  - name: ani
+    groups: [wheel]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOnWj/jlOsP0znb44D4EXfm8dFg7InwEEPHIhq34ddYM
+ssh_pwauth: false
+runcmd:
+  - curl -fsSL BOOTSTRAP_URL | bash

@@ -1,0 +1,10 @@
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+personality = "pragmatic"
+service_tier = "priority"
+approval_policy = "never"
+approvals_reviewer = "user"
+sandbox_mode = "danger-full-access"
+
+# NOTE: Codex rewrites this file at runtime (marketplaces, per-project trust,
+# notify hooks). Those sections are machine state — commit only durable prefs.

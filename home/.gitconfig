@@ -1,0 +1,32 @@
+[user]
+	name = Anirudh Coontoor
+	email = anirudh@gosupernova.live
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOnWj/jlOsP0znb44D4EXfm8dFg7InwEEPHIhq34ddYM
+[core]
+	attributesfile = ~/.gitattributes
+[init]
+	defaultBranch = main
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[gpg]
+	format = ssh
+[gitbutler]
+	signCommits = true
+	aiModelProvider = anthropic
+	aiOpenAIKeyOption = butlerAPI
+	aiOpenAIModelName = gpt-4-turbo-preview
+	aiAnthropicKeyOption = butlerAPI
+	aiAnthropicModelName = claude-3-haiku-20240307
+	gitbutlerCommitter = 0
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential
+# Machine-local: signing program, commit.gpgsign, maintenance repos — never committed
+[include]
+	path = ~/.gitconfig.local

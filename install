@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Make this machine match the repo. Idempotent — run after every pull.
+#
+# --no-folding: link files individually instead of symlinking whole dirs,
+# so runtime state (claude sessions, fish_variables, lazy plugins) lands
+# NEXT TO tracked configs instead of inside the repo.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+stow --no-folding -R -v -t "$HOME" home
+
+# fish plugins (fisher reads home/.config/fish/fish_plugins)
+if command -v fish >/dev/null 2>&1; then
+  fish -c 'functions -q fisher; or begin; curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source; and fisher install jorgebucaran/fisher; end'
+  fish -c 'fisher update'
+fi
+
+# dev runtimes + fnox, from home/.config/mise/config.toml
+if command -v mise >/dev/null 2>&1; then
+  mise install
+fi
+
+echo "done. optional: nvim --headless '+Lazy! restore' +qa   # pre-fetch nvim plugins"
