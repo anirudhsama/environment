@@ -9,5 +9,22 @@ sandbox_mode = "danger-full-access"
 [projects."/Users/ani/Library/Application Support/com.conductor.app/bin"]
 trust_level = "trusted"
 
+[projects."/Users/ani/Documents/code/workspaces/speak"]
+trust_level = "trusted"
+
+[hooks.state]
+
+[hooks.state."/Users/ani/.codex/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:ee472bf24074dafbe7158d925f6bd897faae4cf2cb3ddd7ae587482b8b874416"
+
+[hooks.state."/Users/ani/.codex/hooks.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:d96ce9df94d1c7923d05316525df14cdc4db52585b119235ad512280041e81a3"
+
+[hooks.state."/Users/ani/.codex/hooks.json:stop:0:0"]
+trusted_hash = "sha256:d4ae5f420ec7403cc64e3cee3e3b6a195f1b89314b9d52133f4d10595ba0d190"
+
+[tui.model_availability_nux]
+"gpt-5.5" = 1
+
 # NOTE: Codex rewrites this file at runtime (marketplaces, per-project trust,
 # notify hooks). Those sections are machine state — commit only durable prefs.
