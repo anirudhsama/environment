@@ -51,6 +51,10 @@ alias cat="bat"
 alias vi="nvim"
 alias vim="nvim"
 
+# agents, full-autonomy mode
+alias yolo="claude --dangerously-skip-permissions"
+alias yolox="codex -c model_reasoning_effort=high --dangerously-bypass-approvals-and-sandbox -c model_reasoning_summary=detailed -c model_supports_reasoning_summaries=true"
+
 # mise (dev runtimes: node, bun, fnox, ...)
 if command -q mise
     mise activate fish | source
