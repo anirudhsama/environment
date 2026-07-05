@@ -50,6 +50,8 @@ rm -f ~/.config/fish/config.fish ~/.config/mise/config.toml
 ~/dev/environment/install
 claude ; codex ; doppler login ; atuin login
 fish -c 'source ~/dev/environment/scripts/tide-settings.fish'   # prompt config (tide lives in universal vars)
+# devbox delta: global mise node makes tide's node segment show everywhere — drop it
+fish -c 'set -U tide_right_prompt_items (string match -v node $tide_right_prompt_items)'
 printf '' > ~/.config/fish/local.fish        # host-local fish (secrets)
 printf '[commit]\n\tgpgsign = false\n' > ~/.gitconfig.local
 ```
