@@ -26,9 +26,12 @@ removed (then run bootstrap manually, next step).
 
 ```sh
 ssh ani@<public-ip>            # key from user-data
-# if not run via cloud-init:
-scp bootstrap.sh ani@<ip>: && ssh ani@<ip> sudo bash bootstrap.sh
+# if not run via cloud-init (copy the whole dir — bootstrap.sh reads packages/):
+scp -r bootstrap ani@<ip>: && ssh ani@<ip> sudo bash bootstrap/bootstrap.sh
 ```
+
+Package lists live in `packages/pacman` and `packages/aur` (one per line,
+`#` comments) — edit those to add/remove software, not the script.
 
 Then:
 1. `sudo tailscale up --ssh --operator=ani` → auth URL in browser

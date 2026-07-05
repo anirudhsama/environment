@@ -12,6 +12,17 @@
 # Ongoing: run `update` (paru -Syu wrapper) weekly, at the keyboard.
 set -euo pipefail
 
+# Package lists live in packages/{pacman,aur} — edit those, not this script.
+# Keep the whole bootstrap/ dir together (scp -r bootstrap/ ...).
+PKG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/packages"
+if [ ! -f "$PKG_DIR/pacman" ] || [ ! -f "$PKG_DIR/aur" ]; then
+  echo "ERROR: $PKG_DIR/{pacman,aur} not found — copy the full bootstrap/ directory." >&2
+  exit 1
+fi
+read_pkgs() { sed 's/#.*//' "$1" | tr -s ' \t\n' '\n' | grep -v '^$'; }
+mapfile -t PACMAN_PKGS < <(read_pkgs "$PKG_DIR/pacman")
+mapfile -t AUR_PKGS < <(read_pkgs "$PKG_DIR/aur")
+
 echo ">> swap (coding agents eat RAM; keeps a small VPS alive)"
 # Root fs is btrfs: plain fallocate files can't be swap there (CoW).
 # The cloudimg already ships a 512M /swap/swapfile; we add 4G alongside.
@@ -79,9 +90,8 @@ pacman -Sy --noconfirm archlinux-keyring
 pacman -S --noconfirm --needed reflector
 reflector --country India,Singapore --protocol https --latest 10 --sort rate --save /etc/pacman.d/mirrorlist || true
 pacman -Su --noconfirm
-# postgresql: client only in practice — never `systemctl enable postgresql`
-# stow: dotfiles; age + 1password-cli (AUR): fnox; bubblewrap/socat: claude sandboxing
-pacman -S --noconfirm --needed base-devel git ufw mosh neovim zellij github-cli mise tailscale ripgrep jq htop unzip curl rsync fish atuin postgresql pgcli fzf fd bat tree uv sentry-cli stow age bubblewrap socat tcpdump
+echo ">> installing ${#PACMAN_PKGS[@]} packages from packages/pacman"
+pacman -S --noconfirm --needed "${PACMAN_PKGS[@]}"
 
 systemctl enable --now tailscaled
 systemctl restart sshd
@@ -91,8 +101,8 @@ echo ">> paru (AUR helper): must be built as a normal user, not root"
 # libalpm soname and breaks whenever pacman is newer (seen: .15 vs .16).
 sudo -u ani bash -c 'cd && rm -rf paru && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si --noconfirm && cd && rm -rf paru'
 
-echo ">> AUR packages"
-sudo -u ani paru -S --noconfirm --needed bun-bin claude-code doppler-cli-bin hasura-cli-bin 1password-cli
+echo ">> installing ${#AUR_PKGS[@]} packages from packages/aur"
+sudo -u ani paru -S --noconfirm --needed "${AUR_PKGS[@]}"
 
 echo ">> fish as ani's login shell, with mise activation"
 chsh -s /usr/bin/fish ani
