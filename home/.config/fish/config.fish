@@ -83,3 +83,11 @@ end
 if test -f $__fish_config_dir/local.fish
     source $__fish_config_dir/local.fish
 end
+
+# Remote interactive sessions (ssh/mosh both set SSH_TTY) land in zellij.
+# ZELLIJ guard stops the shells *inside* zellij from recursing; exec means
+# detach (Ctrl-o d) cleanly ends the connection. Keep this last: exec
+# replaces fish, so nothing after it would run.
+if status is-interactive; and set -q SSH_TTY; and not set -q ZELLIJ; and command -q zellij
+    exec zellij attach -c main
+end
