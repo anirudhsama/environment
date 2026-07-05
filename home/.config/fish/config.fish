@@ -46,6 +46,7 @@ end
 
 if test (uname) = Darwin
     alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+    alias devbox="mosh ani@devbox"
 end
 alias cat="bat"
 alias vi="nvim"
