@@ -114,9 +114,6 @@ echo ">> mise for per-project runtime pinning (node via mise; bun system-wide)"
 sudo -u ani bash -c 'grep -q "mise activate" $HOME/.bashrc || echo "eval \"\$(mise activate bash)\"" >> $HOME/.bashrc'
 sudo -u ani bash -c '[ -e $HOME/.config/mise/config.toml ] || mise use -g node@lts'
 
-echo ">> Codex CLI (no official-repo package; npm is upstream's channel)"
-sudo -u ani bash -c 'mise exec node -- npm install -g @openai/codex'
-
 echo ">> herdr (native installer, not AUR: 'herdr update --handoff' upgrades the"
 echo ">> server without killing running agent sessions; package installs cannot)"
 sudo -u ani bash -c 'curl -fsSL https://herdr.dev/install.sh | sh'

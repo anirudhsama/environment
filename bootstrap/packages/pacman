@@ -25,6 +25,7 @@ github-cli
 mise
 uv
 sentry-cli
+openai-codex
 
 # --- database clients (never `systemctl enable postgresql`) ---
 postgresql
