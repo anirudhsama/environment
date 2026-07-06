@@ -20,4 +20,17 @@ if command -v mise >/dev/null 2>&1; then
   mise install
 fi
 
+# macOS: the DevboxDrop launchd agent runs a script, but launchd-spawned
+# processes are denied TCC access to ~/Documents (where this repo lives), so
+# a stow symlink into Documents fails with "Operation not permitted". Copy the
+# real script outside Documents and (re)load the agent pointed at that copy.
+if [ "$(uname)" = "Darwin" ]; then
+  mkdir -p "$HOME/.local/libexec"
+  install -m 755 home/.local/bin/devbox-drop-sync.sh "$HOME/.local/libexec/devbox-drop-sync.sh"
+  mkdir -p "$HOME/DevboxDrop"
+  agent="$HOME/Library/LaunchAgents/dev.ani.devbox-drop.plist"
+  launchctl bootout "gui/$(id -u)/dev.ani.devbox-drop" 2>/dev/null || true
+  launchctl bootstrap "gui/$(id -u)" "$agent" 2>/dev/null || true
+fi
+
 echo "done. optional: nvim --headless '+Lazy! restore' +qa   # pre-fetch nvim plugins"

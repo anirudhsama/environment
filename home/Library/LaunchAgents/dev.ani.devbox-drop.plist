@@ -7,15 +7,26 @@
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bin/bash</string>
-		<string>/Users/ani/.local/bin/devbox-drop-sync.sh</string>
+		<string>/Users/ani/.local/libexec/devbox-drop-sync.sh</string>
 	</array>
 	<key>WatchPaths</key>
 	<array>
 		<string>/Users/ani/DevboxDrop</string>
 	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<key>HOME</key>
+		<string>/Users/ani</string>
+	</dict>
 	<key>ThrottleInterval</key>
 	<integer>3</integer>
 	<key>RunAtLoad</key>
 	<true/>
+	<key>StandardOutPath</key>
+	<string>/Users/ani/DevboxDrop/.sync.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/ani/DevboxDrop/.sync.log</string>
 </dict>
 </plist>
