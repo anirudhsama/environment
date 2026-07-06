@@ -28,3 +28,6 @@ trusted_hash = "sha256:d4ae5f420ec7403cc64e3cee3e3b6a195f1b89314b9d52133f4d10595
 
 # NOTE: Codex rewrites this file at runtime (marketplaces, per-project trust,
 # notify hooks). Those sections are machine state — commit only durable prefs.
+
+[features]
+hooks = true
