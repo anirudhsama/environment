@@ -117,6 +117,11 @@ sudo -u ani bash -c '[ -e $HOME/.config/mise/config.toml ] || mise use -g node@l
 echo ">> Codex CLI (no official-repo package; npm is upstream's channel)"
 sudo -u ani bash -c 'mise exec node -- npm install -g @openai/codex'
 
+echo ">> herdr (native installer, not AUR: 'herdr update --handoff' upgrades the"
+echo ">> server without killing running agent sessions; package installs cannot)"
+sudo -u ani bash -c 'curl -fsSL https://herdr.dev/install.sh | sh'
+sudo -u ani bash -c 'herdr integration install claude && herdr integration install codex' || true
+
 echo ">> DONE. Next steps:"
 echo ">>   1. sudo tailscale up --ssh --operator=ani  (auth in browser; disable key expiry in admin console)"
 echo ">>   2. verify tailnet ssh from another device, then: sudo lockdown"
