@@ -1,0 +1,11 @@
+[Unit]
+Description=Drain Taildrop files into ~/inbox
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/tailscale file get --loop --conflict=rename %h/inbox
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

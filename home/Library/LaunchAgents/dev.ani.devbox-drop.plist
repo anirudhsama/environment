@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>dev.ani.devbox-drop</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>/Users/ani/.local/bin/devbox-drop-sync.sh</string>
+	</array>
+	<key>WatchPaths</key>
+	<array>
+		<string>/Users/ani/DevboxDrop</string>
+	</array>
+	<key>ThrottleInterval</key>
+	<integer>3</integer>
+	<key>RunAtLoad</key>
+	<true/>
+</dict>
+</plist>

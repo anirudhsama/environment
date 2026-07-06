@@ -50,6 +50,7 @@ rm -f ~/.config/fish/config.fish ~/.config/mise/config.toml
 ~/dev/environment/install
 claude ; codex ; doppler login ; atuin login
 fish -c 'source ~/dev/environment/scripts/tide-settings.fish'   # prompt config (tide lives in universal vars)
+mkdir -p ~/inbox && systemctl --user enable --now taildrop-inbox && sudo loginctl enable-linger ani   # Taildrop -> ~/inbox
 printf '' > ~/.config/fish/local.fish        # host-local fish (secrets)
 printf '[commit]\n\tgpgsign = false\n' > ~/.gitconfig.local
 ```
