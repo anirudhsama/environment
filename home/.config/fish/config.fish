@@ -76,6 +76,9 @@ end
 # amp
 fish_add_path ~/.local/bin
 
+# bun global installs (bun install -g -> ~/.bun/bin); node-version-independent
+fish_add_path ~/.bun/bin
+
 # fnox shell integration
 if status is-interactive
     if command -q fnox
