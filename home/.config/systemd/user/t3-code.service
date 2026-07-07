@@ -1,0 +1,12 @@
+[Unit]
+Description=T3 Code remote environment server
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/t3-code-serve
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
