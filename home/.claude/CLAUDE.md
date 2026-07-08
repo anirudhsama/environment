@@ -10,11 +10,11 @@
 
 ## Picking the right models for workflows and subagents
 
-Rankings below are higher = better on each axis. Cost is what I actually pay — gpt-5.5 runs on a priority Codex tier that's effectively free for me — not sticker price. Intelligence is how hard a problem I can hand the model unsupervised. Taste covers UI/UX, code quality, API design, and copy.
+Rankings below are higher = better on each axis. Cost is what I actually pay through my subscriptions, not sticker price. gpt-5.5 lands about level with Opus 4.8 per unit of work — a touch cheaper, since my OpenAI limits are more generous than my Claude ones. Intelligence is how hard a problem I can hand the model unsupervised. Taste covers UI/UX, code quality, API design, and copy.
 
 | model    | cost | intelligence | taste |
 |----------|------|--------------|-------|
-| gpt-5.5  | 9    | 8            | 5     |
+| gpt-5.5  | 5    | 8            | 5     |
 | sonnet-5 | 5    | 5            | 7     |
 | opus-4.8 | 4    | 7            | 8     |
 | fable-5  | 2    | 9            | 9     |
@@ -22,7 +22,7 @@ Rankings below are higher = better on each axis. Cost is what I actually pay —
 How to apply:
 - These are defaults, not limits — you have standing permission to override them. If a cheaper model's output misses the bar, redo the work with a stronger one without asking. Judge the output, not the price tag; escalating costs less than shipping something mediocre.
 - Cost is only a tie-breaker. When the axes conflict on anything that ships, intelligence > taste > cost.
-- Bulk / mechanical work (clear-spec implementation, data analysis, migrations): gpt-5.5 — it's effectively free.
+- Bulk / mechanical work (clear-spec implementation, data analysis, migrations): gpt-5.5 — strong intelligence, and its more generous limits make it the one to lean on for volume.
 - Anything user-facing (UI, copy, API design) needs taste ≥ 7.
 - Reviews of plans or implementations: fable-5 or opus-4.8, optionally gpt-5.5 as an extra independent perspective.
 - Never use Haiku.
