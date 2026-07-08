@@ -1,3 +1,8 @@
 .DS_Store
 local.fish
 .gitconfig.local
+.claude/worktrees/
+home/.claude/worktrees/
+home/.codex/worktrees/
+home/.herdr/worktrees/
+home/.parada/worktrees/

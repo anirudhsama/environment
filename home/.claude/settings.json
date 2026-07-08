@@ -142,5 +142,8 @@
   },
   "model": "claude-fable-5[1m]",
   "skipDangerousModePermissionPrompt": true,
-  "tui": "fullscreen"
+  "tui": "fullscreen",
+  "worktree": {
+    "baseRef": "fresh"
+  }
 }
