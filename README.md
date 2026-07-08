@@ -30,9 +30,10 @@ the repo), bootstraps fisher + fish plugins from `fish_plugins`, and runs
 
 ## Notes
 
-- Codex rewrites `~/.codex/config.toml` at runtime (project trust, hook trust,
-  UI state), so the live file is ignored. Keep durable defaults in
-  `home/.codex/config.toml.example`.
+- `~/.codex/config.toml` is a standalone real file, not stow-managed — Codex
+  rewrites it at runtime (project trust, hook trust, UI state), so it stays out
+  of the repo (`.gitignore` guards against accidentally committing it). Seed a
+  new machine by copying `home/.codex/config.toml.example`.
 - `install` uses `bunx add-mcp` to install common MCP servers globally for
   Claude Code and Codex only.
 - Fish plugin files (`conf.d/z.fish`, tide, fzf functions, themes) are
