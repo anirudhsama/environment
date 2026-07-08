@@ -10,6 +10,8 @@
 
 ## Picking the right models for workflows and subagents
 
+Reach for a subagent or a workflow when the work actually fans out — independent files, dimensions, or candidate approaches — when a result needs an independent adversarial check before it ships, or when the job is too big for one context to hold. For a single-threaded task that fits in this context, just do it inline; orchestration has real overhead and isn't the default. Once you are fanning out, pick the model per the table below.
+
 Rankings below are higher = better on each axis. Cost is what I actually pay through my subscriptions, not sticker price. gpt-5.5 lands about level with Opus 4.8 per unit of work — a touch cheaper, since my OpenAI limits are more generous than my Claude ones. Intelligence is how hard a problem I can hand the model unsupervised. Taste covers UI/UX, code quality, API design, and copy.
 
 | model    | cost | intelligence | taste |
