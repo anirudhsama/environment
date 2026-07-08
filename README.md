@@ -25,12 +25,16 @@ the repo), bootstraps fisher + fish plugins from `fish_plugins`, and runs
 | `~/.config/fish/local.fish` | secrets & host-specific fish (psql connection functions live here on the Mac) |
 | `~/.gitconfig.local` | commit signing program, `commit.gpgsign`, maintenance repos |
 | `~/.claude/settings.local.json` | machine-local Claude Code settings |
+| `~/.codex/config.toml` | Codex runtime config; start from `home/.codex/config.toml.example` |
 | `~/.codex/auth.json`, `~/.local/share/atuin/key` | credentials — back up via 1Password, not git |
 
 ## Notes
 
-- Codex rewrites `~/.codex/config.toml` at runtime (marketplace/trust sections),
-  so `git status` will show churn there; commit only meaningful pref changes.
+- Codex rewrites `~/.codex/config.toml` at runtime (project trust, hook trust,
+  UI state), so the live file is ignored. Keep durable defaults in
+  `home/.codex/config.toml.example`.
+- `install` uses `bunx add-mcp` to install common MCP servers globally for
+  Claude Code and Codex only.
 - Fish plugin files (`conf.d/z.fish`, tide, fzf functions, themes) are
   fisher-managed and intentionally untracked — `fish_plugins` is the lockfile.
 - Neovim plugins restore from `lazy-lock.json` on first launch

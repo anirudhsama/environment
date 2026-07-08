@@ -1,6 +1,7 @@
 .DS_Store
 local.fish
 .gitconfig.local
+home/.codex/config.toml
 .claude/worktrees/
 home/.claude/worktrees/
 home/.codex/worktrees/

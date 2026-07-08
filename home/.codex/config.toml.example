@@ -1,0 +1,26 @@
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+personality = "pragmatic"
+service_tier = "priority"
+approval_policy = "never"
+approvals_reviewer = "user"
+sandbox_mode = "danger-full-access"
+
+[features]
+hooks = true
+
+[mcp_servers.sideshow]
+type = "http"
+url = "https://sideshow.sh/mcp"
+
+[mcp_servers.context7]
+type = "http"
+url = "https://mcp.context7.com/mcp"
+
+[mcp_servers.deepwiki]
+type = "http"
+url = "https://mcp.deepwiki.com/mcp"
+
+[mcp_servers.gh_grep]
+type = "http"
+url = "https://mcp.grep.app"
