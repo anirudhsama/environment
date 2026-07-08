@@ -7,6 +7,13 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# This LaunchAgent must be a real file in ~/Library/LaunchAgents, not a Stow
+# symlink back into ~/Documents. Remove the managed copy before stowing so
+# repeated installs do not conflict, then copy it back in the macOS block below.
+if [ "$(uname)" = "Darwin" ]; then
+  rm -f "$HOME/Library/LaunchAgents/dev.ani.devbox-drop.plist"
+fi
+
 stow --no-folding -R -v -t "$HOME" home
 
 # fish plugins (fisher reads home/.config/fish/fish_plugins)
@@ -35,16 +42,20 @@ install_common_mcps() {
 
 install_common_mcps
 
-# macOS: the DevboxDrop launchd agent runs a script, but launchd-spawned
-# processes are denied TCC access to ~/Documents (where this repo lives), so
-# a stow symlink into Documents fails with "Operation not permitted". Copy the
-# real script outside Documents and (re)load the agent pointed at that copy.
+# macOS: the DevboxDrop launchd agent and script must be real files outside
+# ~/Documents. launchd-spawned processes can be denied TCC access to this repo,
+# and login-time agent discovery is fragile when the plist is a Stow symlink
+# into Documents. Copy both files into launchd-readable locations and load them.
 if [ "$(uname)" = "Darwin" ]; then
   mkdir -p "$HOME/.local/libexec"
   install -m 755 home/.local/bin/devbox-drop-sync.sh "$HOME/.local/libexec/devbox-drop-sync.sh"
   mkdir -p "$HOME/DevboxDrop"
+  mkdir -p "$HOME/Library/LaunchAgents"
   agent="$HOME/Library/LaunchAgents/dev.ani.devbox-drop.plist"
   launchctl bootout "gui/$(id -u)/dev.ani.devbox-drop" 2>/dev/null || true
+  rm -f "$agent"
+  install -m 644 home/Library/LaunchAgents/dev.ani.devbox-drop.plist "$agent"
+  launchctl enable "gui/$(id -u)/dev.ani.devbox-drop" 2>/dev/null || true
   launchctl bootstrap "gui/$(id -u)" "$agent" 2>/dev/null || true
 fi
 
