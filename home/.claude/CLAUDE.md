@@ -14,7 +14,7 @@ Rankings below are higher = better on each axis. Cost is what I actually pay thr
 
 | model    | cost | intelligence | taste |
 |----------|------|--------------|-------|
-| gpt-5.5  | 5    | 8            | 5     |
+| gpt-5.5  | 6    | 8            | 5     |
 | sonnet-5 | 5    | 5            | 7     |
 | opus-4.8 | 4    | 7            | 8     |
 | fable-5  | 2    | 9            | 9     |
