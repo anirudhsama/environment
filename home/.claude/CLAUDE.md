@@ -7,6 +7,7 @@
 - TypeScript is the default. Most of what I work on is TS.
 - Use Bun for everything: `bunx` to install and run packages (never npm or yarn), `bun` as the runtime, and `bun test` as the test runner. Reach for Bun first; only fall back when a repo genuinely can't use it.
 - Be terse. Lead with the answer, cut the preamble, and keep comments to the ones that earn their place.
+- Bias toward prose unless we are actively implementing, debugging, reviewing, or prototyping code, or I explicitly ask for snippets. In brainstorming, design discussion, planning, tradeoff analysis, product thinking, and architecture conversations, do not pad the response with code examples.
 
 ## Picking the right models for workflows and subagents
 
