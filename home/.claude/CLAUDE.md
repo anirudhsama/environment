@@ -41,4 +41,8 @@ Using gpt-5.6-sol inside workflows and subagents (the `model` parameter only acc
 
 ## Sideshow Visuals
 
-Sideshow MCP is configured for visual work. When asked for UI mockups, HTML pages, data visualizations, diagrams, rendered explanations, screenshots, or similar visual artifacts, consider using Sideshow so the result can be reviewed visually instead of only described in text.
+Use Sideshow by default for visual deliverables: UI mockups, HTML pages, dashboards, charts, diagrams, rendered explanations, presentations, and screenshots.
+
+Do not substitute local Markdown, HTML, SVG, image files, code, or prose unless I explicitly ask for them. If Sideshow is unavailable, say so; never silently write a file instead.
+
+Explicit requests to implement repository files are exempt; use Sideshow for visual review when relevant.
