@@ -42,6 +42,19 @@ install_common_mcps() {
 
 install_common_mcps
 
+install_opencode_server() {
+  [ "$(uname)" = "Linux" ] || return 0
+  command -v opencode >/dev/null 2>&1 || paru -S --noconfirm --needed opencode-bin
+
+  mkdir -p "$HOME/.config/systemd/user"
+  install -m 644 systemd/opencode.service "$HOME/.config/systemd/user/opencode.service"
+
+  systemctl --user daemon-reload
+  systemctl --user enable --now opencode.service
+}
+
+install_opencode_server
+
 # macOS: the DevboxDrop launchd agent and script must be real files outside
 # ~/Documents. launchd-spawned processes can be denied TCC access to this repo,
 # and login-time agent discovery is fragile when the plist is a Stow symlink
