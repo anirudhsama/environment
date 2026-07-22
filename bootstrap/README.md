@@ -33,6 +33,11 @@ scp -r bootstrap ani@<ip>: && ssh ani@<ip> sudo bash bootstrap/bootstrap.sh
 Package lists live in `packages/pacman` and `packages/aur` (one per line,
 `#` comments) — edit those to add/remove software, not the script.
 
+The bootstrap enables 28 days of historical monitoring: `atop` records
+process-level activity and `sysstat` samples system activity every 10 minutes.
+Use `atop` for process history, `sar -u` for CPU history, and `sar -r` for
+memory history.
+
 Then:
 1. `sudo tailscale up --ssh --operator=ani` → auth URL in browser
 2. Tailscale admin console → Machines → devbox → **Disable key expiry**

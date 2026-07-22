@@ -39,6 +39,9 @@ bat
 tree
 jq
 htop
+btop
+atop
+sysstat
 unzip
 curl
 
