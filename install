@@ -27,20 +27,7 @@ if command -v mise >/dev/null 2>&1; then
   mise install
 fi
 
-install_common_mcps() {
-  command -v bunx >/dev/null 2>&1 || {
-    echo "skipping MCP install: bunx not found"
-    return 0
-  }
-
-  local args=(-g -y -a claude-code -a codex --transport http)
-  bunx add-mcp "https://sideshow.sh/mcp" --name sideshow "${args[@]}"
-  bunx add-mcp "https://mcp.context7.com/mcp" --name context7 "${args[@]}"
-  bunx add-mcp "https://mcp.deepwiki.com/mcp" --name deepwiki "${args[@]}"
-  bunx add-mcp "https://mcp.grep.app" --name gh_grep "${args[@]}"
-}
-
-install_common_mcps
+scripts/sync-common-mcps
 
 install_devbox_services() {
   [ "$(uname)" = "Linux" ] || return 0

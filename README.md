@@ -34,8 +34,8 @@ the repo), bootstraps fisher + fish plugins from `fish_plugins`, and runs
   rewrites it at runtime (project trust, hook trust, UI state), so it stays out
   of the repo (`.gitignore` guards against accidentally committing it). Seed a
   new machine by copying `home/.codex/config.toml.example`.
-- `install` uses `bunx add-mcp` to install common MCP servers globally for
-  Claude Code and Codex only.
+- `install` reconciles the common global MCP servers for Claude Code and Codex
+  without overwriting existing authentication or headers.
 - Fish plugin files (`conf.d/z.fish`, tide, fzf functions, themes) are
   fisher-managed and intentionally untracked — `fish_plugins` is the lockfile.
 - Neovim plugins restore from `lazy-lock.json` on first launch

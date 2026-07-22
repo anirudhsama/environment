@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+command -v bunx >/dev/null 2>&1 || {
+  echo "skipping MCP sync: bunx not found"
+  exit 0
+}
+
+servers=(
+  "sideshow|https://sideshow.sh/mcp"
+  "context7|https://mcp.context7.com/mcp"
+  "deepwiki|https://mcp.deepwiki.com/mcp"
+  "gh_grep|https://mcp.grep.app"
+)
+
+sync_agent() {
+  local agent="$1"
+  local cli="$2"
+
+  command -v "$cli" >/dev/null 2>&1 || {
+    echo "skipping $agent MCP sync: $cli not found"
+    return 0
+  }
+
+  local entry name url
+  for entry in "${servers[@]}"; do
+    name="${entry%%|*}"
+    url="${entry#*|}"
+
+    if "$cli" mcp get "$name" >/dev/null 2>&1; then
+      continue
+    fi
+
+    bunx add-mcp "$url" \
+      --name "$name" \
+      --global \
+      --yes \
+      --agent "$agent" \
+      --transport http
+  done
+}
+
+sync_agent claude-code claude
+sync_agent codex codex
