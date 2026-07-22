@@ -93,6 +93,12 @@ pacman -Su --noconfirm
 echo ">> installing ${#PACMAN_PKGS[@]} packages from packages/pacman"
 pacman -S --noconfirm --needed "${PACMAN_PKGS[@]}"
 
+echo ">> monitoring: 28-day process, CPU, and memory history"
+# atop records process-level samples every 10 minutes. sysstat.service enables
+# its 10-minute collector plus daily rotation and summary timers.
+sed -i -E 's/^HISTORY=.*/HISTORY=28/' /etc/conf.d/sysstat
+systemctl enable --now atop.service sysstat.service
+
 systemctl enable --now tailscaled
 systemctl restart sshd
 

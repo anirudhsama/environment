@@ -42,6 +42,22 @@ install_devbox_services() {
 
 install_devbox_services
 
+install_devbox_monitoring() {
+  [ "$(uname)" = "Linux" ] || return 0
+
+  # Bootstrap normally provides these; keep a manually-provisioned Dev Box
+  # convergent as well. atop keeps process-level history; sysstat feeds sar.
+  command -v btop >/dev/null 2>&1 \
+    && command -v atop >/dev/null 2>&1 \
+    && command -v sar >/dev/null 2>&1 \
+    || sudo pacman -S --noconfirm --needed btop atop sysstat
+
+  sudo sed -i -E 's/^HISTORY=.*/HISTORY=28/' /etc/conf.d/sysstat
+  sudo systemctl enable --now atop.service sysstat.service
+}
+
+install_devbox_monitoring
+
 # macOS: the DevboxDrop launchd agent and script must be real files outside
 # ~/Documents. launchd-spawned processes can be denied TCC access to this repo,
 # and login-time agent discovery is fragile when the plist is a Stow symlink
