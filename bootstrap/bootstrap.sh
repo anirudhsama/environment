@@ -82,6 +82,10 @@ echo ">> Consider a CloudPe snapshot before kernel/major updates."
 # Keyring first avoids "signature is unknown trust" after idle weeks.
 sudo pacman -Sy --noconfirm archlinux-keyring
 paru -Syu
+if command -v bun >/dev/null 2>&1; then
+  bun update -g
+  bun outdated -g || true
+fi
 EOF
 chmod 755 /usr/local/bin/update
 
@@ -125,8 +129,19 @@ echo ">> server without killing running agent sessions; package installs cannot)
 sudo -u ani bash -c 'curl -fsSL https://herdr.dev/install.sh | sh'
 sudo -u ani bash -c 'herdr integration install claude && herdr integration install codex' || true
 
-echo ">> bun global CLIs (not on AUR; ~/.bun/bin is node-version-independent)"
-sudo -u ani bash -c 'bun install -g hunkdiff'
+echo ">> bun global CLIs (~/.bun/bin is node-version-independent)"
+sudo -u ani bash -c 'bun install -g --trust hunkdiff @xai-official/grok'
+
+# The Grok package identifies itself as npm-managed and its built-in updater
+# shells out to npm. Keep Bun as the sole owner so `bun outdated -g` is accurate.
+sudo -u ani bash -c '
+  config="$HOME/.grok/config.toml"
+  if grep -q "^[[:space:]]*auto_update[[:space:]]*=" "$config"; then
+    sed -i "s/^[[:space:]]*auto_update[[:space:]]*=.*$/auto_update = false/" "$config"
+  else
+    sed -i "/^\[cli\][[:space:]]*$/a auto_update = false" "$config"
+  fi
+'
 
 echo ">> DONE. Next steps:"
 echo ">>   1. sudo tailscale up --ssh --operator=ani  (auth in browser; disable key expiry in admin console)"

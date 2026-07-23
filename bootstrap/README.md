@@ -53,7 +53,7 @@ git clone https://github.com/<you>/environment ~/dev/environment
 # first run only: bootstrap stubbed fish/mise configs; remove so stow can link
 rm -f ~/.config/fish/config.fish ~/.config/mise/config.toml
 ~/dev/environment/install
-claude ; codex ; doppler login ; atuin login
+claude ; codex ; grok login ; doppler login ; atuin login
 fish -c 'source ~/dev/environment/scripts/tide-settings.fish'   # prompt config (tide lives in universal vars)
 mkdir -p ~/inbox && systemctl --user enable --now taildrop-inbox && sudo loginctl enable-linger ani   # Taildrop -> ~/inbox
 printf '' > ~/.config/fish/local.fish        # host-local fish (secrets)
