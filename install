@@ -33,6 +33,10 @@ install_devbox_services() {
   [ "$(uname)" = "Linux" ] || return 0
   command -v opencode >/dev/null 2>&1 || paru -S --noconfirm --needed opencode-bin
 
+  mkdir -p "$HOME/.local/bin"
+  rm -f "$HOME/.local/bin/t3code"
+  install -m 755 bootstrap/t3code "$HOME/.local/bin/t3code"
+
   mkdir -p "$HOME/.config/systemd/user"
   install -m 644 systemd/opencode.service "$HOME/.config/systemd/user/opencode.service"
 

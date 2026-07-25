@@ -60,6 +60,9 @@ printf '' > ~/.config/fish/local.fish        # host-local fish (secrets)
 printf '[commit]\n\tgpgsign = false\n' > ~/.gitconfig.local
 ```
 
+`t3code upgrade` refreshes the T3 Code service to the latest nightly and waits
+for its HTTP endpoint to become ready.
+
 ## Known one-time fixes already baked into bootstrap.sh
 
 - **Locales**: cloudimg ships none; mosh-server refuses to start without UTF-8.

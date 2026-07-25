@@ -1,0 +1,51 @@
+#!/usr/bin/env fish
+
+set -l service t3-code.service
+set -l port 3773
+
+function usage
+    echo "usage: t3code upgrade" >&2
+    return 2
+end
+
+if test (count $argv) -ne 1; or test "$argv[1]" != upgrade
+    usage
+    exit $status
+end
+
+echo "Upgrading T3 Code to the latest nightly..."
+systemctl --user restart $service; or exit $status
+
+for attempt in (seq 1 120)
+    if curl -fsS --max-time 2 "http://127.0.0.1:$port/" >/dev/null 2>&1
+        set -l service_pid (systemctl --user show $service -p MainPID --value)
+        set -l t3_pid (pgrep -P $service_pid -f 'node .*/node_modules/.bin/t3 serve' | head -n1)
+        set -l t3_version unknown
+
+        if test -n "$t3_pid"
+            set -l entrypoint (string split0 </proc/$t3_pid/cmdline | string match -r '.*/node_modules/\.bin/t3$' | head -n1)
+            if test -n "$entrypoint"
+                set -l package_json (string replace -r '/node_modules/\.bin/t3$' '/node_modules/t3/package.json' -- $entrypoint)
+                if test -f "$package_json"
+                    set t3_version (bun -e 'console.log(require(process.argv[1]).version)' "$package_json")
+                end
+            end
+        end
+
+        set -l memory_bytes (systemctl --user show $service -p MemoryCurrent --value)
+        set -l memory_mib (math --scale=0 "$memory_bytes / 1024 / 1024")
+        echo "T3 Code $t3_version is ready on port $port ($memory_mib MiB)."
+        exit 0
+    end
+
+    if systemctl --user is-failed --quiet $service
+        echo "T3 Code failed to start. Check: journalctl --user -u $service -n 100" >&2
+        exit 1
+    end
+
+    sleep 1
+end
+
+echo "T3 Code did not become ready within 120 seconds." >&2
+echo "Check: journalctl --user -u $service -n 100" >&2
+exit 1

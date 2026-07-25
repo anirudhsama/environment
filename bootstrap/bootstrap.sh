@@ -14,9 +14,10 @@ set -euo pipefail
 
 # Package lists live in packages/{pacman,aur} — edit those, not this script.
 # Keep the whole bootstrap/ dir together (scp -r bootstrap/ ...).
-PKG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/packages"
-if [ ! -f "$PKG_DIR/pacman" ] || [ ! -f "$PKG_DIR/aur" ]; then
-  echo "ERROR: $PKG_DIR/{pacman,aur} not found — copy the full bootstrap/ directory." >&2
+BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_DIR="$BOOTSTRAP_DIR/packages"
+if [ ! -f "$PKG_DIR/pacman" ] || [ ! -f "$PKG_DIR/aur" ] || [ ! -f "$BOOTSTRAP_DIR/t3code" ]; then
+  echo "ERROR: bootstrap assets not found — copy the full bootstrap/ directory." >&2
   exit 1
 fi
 read_pkgs() { sed 's/#.*//' "$1" | tr -s ' \t\n' '\n' | grep -v '^$'; }
@@ -113,6 +114,9 @@ sudo -u ani bash -c 'cd && rm -rf paru && git clone https://aur.archlinux.org/pa
 
 echo ">> installing ${#AUR_PKGS[@]} packages from packages/aur"
 sudo -u ani paru -S --noconfirm --needed "${AUR_PKGS[@]}"
+
+echo ">> T3 Code nightly upgrade helper"
+install -m 755 "$BOOTSTRAP_DIR/t3code" /usr/local/bin/t3code
 
 echo ">> fish as ani's login shell, with mise activation"
 chsh -s /usr/bin/fish ani
