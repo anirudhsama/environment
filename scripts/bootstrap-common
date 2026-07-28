@@ -35,6 +35,9 @@ if ! command -v herdr >/dev/null 2>&1; then
   herdr integration install claude && herdr integration install codex || true
 fi
 
+# --- keep mise the sole owner of the grok install ----------------------------
+scripts/grok-pin-install
+
 # --- common global MCP servers for Claude Code and Codex ---------------------
 scripts/sync-common-mcps
 

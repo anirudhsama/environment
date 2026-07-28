@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Keep mise the sole owner of the grok install.
+#
+# Grok's built-in updater shells out to npm, which would rewrite the package
+# inside mise's tool directory behind mise's back — the drift the sourcing
+# policy exists to prevent. Force `[cli] auto_update = false`.
+#
+# Not a tracked dotfile: grok owns this file and rewrites it at runtime
+# (marketplace state, [ui] preferences, a machine-derived `installer` key), so
+# symlinking it into the repo would have grok dirtying the repo on every
+# preference change — the same reason ~/.codex/config.toml stays out.
+#
+# Idempotent, and safe from every starting state: no file, a file with no [cli]
+# table (grok's own default), [cli] without the key, or the key already set.
+set -euo pipefail
+
+config="$HOME/.grok/config.toml"
+mkdir -p "$(dirname "$config")"
+[ -f "$config" ] || : > "$config"
+
+tmp=$(mktemp)
+awk '
+  # an existing key wins wherever it sits — rewrite it in place
+  /^[[:space:]]*auto_update[[:space:]]*=/ {
+    if (!done) { print "auto_update = false"; done = 1 }
+    next
+  }
+  # otherwise plant it directly under the [cli] header
+  /^\[cli\][[:space:]]*$/ {
+    print
+    if (!done) { print "auto_update = false"; done = 1 }
+    next
+  }
+  { print }
+  # no [cli] table at all: append one
+  END { if (!done) { print "[cli]"; print "auto_update = false" } }
+' "$config" > "$tmp"
+mv "$tmp" "$config"

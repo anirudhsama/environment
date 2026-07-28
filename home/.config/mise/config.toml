@@ -20,9 +20,6 @@ fnox = "latest"
 hunkdiff = "latest"            # aqua:modem-dev/hunk — native binary, no node
 doppler = "latest"
 hasura-cli = "latest"
-# Resolves via the registry's vfox plugin. The aqua entry (aqua:1password/cli)
-# is a stub with no repo_owner/repo_name and does not resolve — don't pin it.
-1password-cli = "latest"
 
 # npm-only CLIs. These were bun globals (and a Homebrew cask for grok), which
 # is how the Mac and devbox drifted several major versions apart.

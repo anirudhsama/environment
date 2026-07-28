@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 
-set -l service t3-code.service
+set -l service dev.mise.t3-code.service
 set -l port 3773
 
 function usage
