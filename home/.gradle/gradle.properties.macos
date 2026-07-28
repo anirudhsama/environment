@@ -1,0 +1,12 @@
+# Mac (15 cores / 48 GiB). Linked by mise.macos.toml.
+#
+# Deliberately lighter than the devbox: no org.gradle.workers.max, so Gradle
+# uses all 15 cores, and no org.gradle.jvmargs, so the project's -Xmx2048m
+# stands. There is no memory pressure to manage here.
+
+# Roomier than the devbox's ceiling; it is a cap, not an allocation.
+kotlin.daemon.jvmargs=-Xmx3g
+
+# Shorter than the 3h default so daemons from old branches don't linger,
+# but long enough to stay warm across a work session.
+org.gradle.daemon.idletimeout=3600000

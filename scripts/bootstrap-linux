@@ -22,29 +22,7 @@ sudo loginctl enable-linger "$USER"
 sudo sed -i -E 's/^HISTORY=.*/HISTORY=28/' /etc/conf.d/sysstat
 sudo systemctl enable --now atop.service sysstat.service
 
-# --- gradle memory ceilings --------------------------------------------------
-# Agents work in parallel git worktrees, and each distinct checkout can hold its
-# own Gradle daemon for 3 hours by default. Five java processes at 2.6-3.5 GB
-# were OOM-killed on 16-17 Jul that way.
-#
-# User-level gradle.properties OVERRIDES the project's, so this deliberately
-# does not set org.gradle.jvmargs — apps/*/android already pin -Xmx2048m and
-# raising it here would make accumulation worse. Only the unbounded knobs.
-#
-# Devbox-only: written here rather than tracked as a dotfile because the Mac has
-# more cores and does Android through Studio, so these numbers are wrong there.
-mkdir -p "$HOME/.gradle"
-cat > "$HOME/.gradle/gradle.properties" <<'GRADLE'
-# Managed by scripts/bootstrap-linux — edit there, not here.
-
-# The Kotlin compile daemon is a second JVM per build, unbounded by the project.
-kotlin.daemon.jvmargs=-Xmx1536m
-
-# 6 cores, leaving headroom for the agent services.
-org.gradle.workers.max=4
-
-# Default is 3h, which is how daemons pile up across worktrees. 20 minutes.
-org.gradle.daemon.idletimeout=1200000
-GRADLE
+# Gradle memory ceilings are a tracked dotfile now — see [dotfiles] in
+# mise.linux.toml, which links home/.gradle/gradle.properties.linux.
 
 echo "bootstrap: linux steps done."

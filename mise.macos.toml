@@ -10,6 +10,13 @@
 # Note for that pass: Homebrew does NOT add fish to /etc/shells the way Arch's
 # package does, so a fresh Mac needs that line present before phase 8 can chsh.
 
+# --- 3. dotfiles (macOS-only) ------------------------------------------------
+# [dotfiles] has no per-entry OS filter, but a [dotfiles] table inside a
+# platform config effectively is one — this only applies where mise loads
+# mise.macos.toml.
+[dotfiles]
+"~/.gradle/gradle.properties" = { source = "home/.gradle/gradle.properties.macos", mode = "symlink" }
+
 # --- 6. LaunchAgents ---------------------------------------------------------
 # [bootstrap.macos.launchd.agents] is deliberately unused. The DevboxDrop agent
 # is WatchPaths driven and mise's launchd schema has no WatchPaths or

@@ -84,6 +84,13 @@
 # --- debugging ---
 "pacman:tcpdump" = "latest"
 
+# --- 3. dotfiles (Linux-only) ------------------------------------------------
+# [dotfiles] has no per-entry OS filter, but a [dotfiles] table inside a
+# platform config effectively is one — this only applies where mise loads
+# mise.linux.toml.
+[dotfiles]
+"~/.gradle/gradle.properties" = { source = "home/.gradle/gradle.properties.linux", mode = "symlink" }
+
 # --- 7. systemd user units ---------------------------------------------------
 # mise writes and enables these directly, namespaced as dev.mise.<name>.service.
 # `%h` is expanded by systemd, not mise.

@@ -1,0 +1,15 @@
+# Devbox (6 cores / 23 GiB). Linked by mise.linux.toml.
+#
+# User-level gradle.properties takes precedence over the project's, so
+# org.gradle.jvmargs is deliberately absent — apps/*/android already pin
+# -Xmx2048m and overriding it here would raise per-daemon heap across every
+# worktree, worsening the accumulation this file exists to prevent.
+
+# The Kotlin compile daemon is a second JVM per build, unbounded by the project.
+kotlin.daemon.jvmargs=-Xmx1536m
+
+# 6 cores, leaving headroom for the opencode / t3-code services.
+org.gradle.workers.max=4
+
+# Default is 3h, which is how daemons pile up across 10 agent worktrees.
+org.gradle.daemon.idletimeout=1200000
