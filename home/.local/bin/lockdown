@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Close the public interface once Tailscale is verified working.
+# Run at the keyboard, after `tailscale up` and after you've confirmed tailnet
+# SSH from another device. Idempotent.
+set -euo pipefail
+
+if ! command -v ufw >/dev/null 2>&1; then
+  echo "ufw is not installed — run \`mise bootstrap\` first." >&2
+  exit 1
+fi
+
+if ! tailscale ip -4 >/dev/null 2>&1; then
+  echo "Tailscale is not connected — refusing to enable the firewall." >&2
+  exit 1
+fi
+
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow in on tailscale0
+sudo ufw allow 41641/udp comment 'tailscale direct connections'
+# Break-glass: public SSH stays key-only and rate-limited.
+# Remove once you trust the provider console:  sudo ufw delete limit 22/tcp
+sudo ufw limit 22/tcp comment 'break-glass SSH, key-only'
+sudo ufw --force enable
+sudo systemctl enable ufw
+sudo ufw status verbose

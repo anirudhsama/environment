@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# The one manual chore Arch demands. Run weekly, at the keyboard.
+set -euo pipefail
+
+echo ">> Consider a CloudPe snapshot before kernel/major updates."
+
+# Keyring first avoids "signature is unknown trust" after idle weeks.
+sudo pacman -Sy --noconfirm archlinux-keyring
+
+# Full system upgrade, deliberately NOT `mise bootstrap packages upgrade`.
+# That command runs `pacman -Sy` then `pacman -S -- <declared packages>` with
+# no `-u`: a partial upgrade, which Arch explicitly does not support and which
+# is the standard way to break glibc/libalpm. It's fine on brew/apt/dnf; it is
+# not fine here. The system moves as a unit or not at all.
+#
+# paru is optional — nothing in provisioning needs the AUR. If it's installed
+# as an escape hatch, use it so AUR packages come along too.
+if command -v paru >/dev/null 2>&1; then
+  paru -Syu
+else
+  sudo pacman -Syu
+fi
+
+# mise itself isn't a pacman package — it ships near-daily and every distro
+# lags it — so pacman -Syu above doesn't touch it. self-update only works
+# because we install from https://mise.run rather than from a package manager.
+if command -v mise >/dev/null 2>&1; then
+  mise self-update --yes || true
+
+  # mise-managed runtimes and CLIs (node, bun, uv, fnox, vercel, grok, ...).
+  # `= "latest"` is satisfied by any installed version, so this is what
+  # actually moves them forward.
+  mise upgrade
+  mise outdated || true
+fi
+
+# Tools that manage their own updates, so neither pacman nor mise sees them.
+
+# claude-code auto-updates in the background; this just applies it now rather
+# than on the next launch. No-ops if it's already current.
+if command -v claude >/dev/null 2>&1; then
+  claude update || true
+fi
+
+# --handoff swaps the herdr server without killing running agent sessions.
+if command -v herdr >/dev/null 2>&1; then
+  herdr update --handoff || true
+fi

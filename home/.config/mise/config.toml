@@ -1,12 +1,44 @@
+# Global tools — on PATH everywhere, on both machines.
+#
+# What belongs here: language runtimes, and CLIs that either aren't packaged by
+# pacman/brew, lag materially behind upstream there, or are npm-only. Anything
+# pacman ships at upstream parity stays an OS package (see mise.toml).
+#
+# Project-specific runtimes (erlang, elixir, ...) belong in that project's own
+# mise.toml, not here.
+
 [tools]
-erlang = "26.2.5"
-elixir = "1.16.2"
+node = "24"
 bun = "1.3"
-node = "22"
-fnox = "1.25.1" # pinned: 1.29+ artifact attestation fails on mise <2026.7; unpin after mise updates
+python = "3.12"
+# uv is mise-managed, deliberately NOT a pacman/brew package — two copies with
+# the shim silently winning is worse than either choice alone.
+uv = "latest"
+fnox = "latest"
+
+# CLIs with no OS package, or where the OS package split the two machines.
+hunkdiff = "latest"            # aqua:modem-dev/hunk — native binary, no node
+doppler = "latest"
+hasura-cli = "latest"
+# Resolves via the registry's vfox plugin. The aqua entry (aqua:1password/cli)
+# is a stub with no repo_owner/repo_name and does not resolve — don't pin it.
+1password-cli = "latest"
+
+# npm-only CLIs. These were bun globals (and a Homebrew cask for grok), which
+# is how the Mac and devbox drifted several major versions apart.
+"npm:eas-cli" = "latest"
+"npm:vercel" = "latest"
+"npm:agent-browser" = "latest"
+"npm:@xai-official/grok" = "latest"
 
 [settings]
 experimental = true
-idiomatic_version_file_enable_tools = ["pytho", "python"]
-trusted_config_paths = ["/Users/ani/conductor/workspaces", "/Users/ani/Documents/code/workspaces", "/Users/ani/.t3/worktrees/", "/Users/ani/.superset/worktrees", "/Users/ani/.codex/worktrees"]
+idiomatic_version_file_enable_tools = ["python"]
+trusted_config_paths = [
+  "/Users/ani/conductor/workspaces",
+  "/Users/ani/Documents/code/workspaces",
+  "/Users/ani/.t3/worktrees/",
+  "/Users/ani/.superset/worktrees",
+  "/Users/ani/.codex/worktrees",
+]
 lockfile = true

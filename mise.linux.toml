@@ -1,0 +1,125 @@
+# Arch devbox. Loaded automatically on Linux via auto_env (see .miserc.toml).
+# Sections ordered the way `mise bootstrap` runs them — see mise.toml for the
+# full phase list.
+
+# --- 1. system packages ------------------------------------------------------
+# mise is deliberately absent: it comes from https://mise.run, the only install
+# route that enables `mise self-update`, and it's the one tool where distro
+# packaging measurably lags (near-daily releases).
+#
+# git is also in bootstrap.sh's seed set; declaring it here too is intentional —
+# this table is the complete picture and pacman --needed makes it a no-op.
+#
+# fish matters for phase 8: its Arch package has a post_install scriptlet that
+# appends /usr/bin/fish to /etc/shells, which is what chsh validates against.
+[bootstrap.packages]
+
+# --- system / provisioning ---
+"pacman:base-devel" = "latest"
+"pacman:git" = "latest"
+"pacman:openssh" = "latest"
+"pacman:rsync" = "latest"
+"pacman:ufw" = "latest"
+
+# --- remote access ---
+"pacman:mosh" = "latest"
+"pacman:tailscale" = "latest"
+
+# --- shell ---
+"pacman:fish" = "latest"
+"pacman:atuin" = "latest"
+"pacman:zellij" = "latest"
+
+# --- editor ---
+"pacman:neovim" = "latest"
+
+# --- dev tooling ---
+"pacman:github-cli" = "latest"
+"pacman:sentry-cli" = "latest"
+# Both agent CLIs are in extra at upstream parity — no AUR needed.
+"pacman:openai-codex" = "latest"
+"pacman:opencode" = "latest"
+
+# --- database clients (client only; postgresql-libs owns /usr/bin/psql) ---
+"pacman:postgresql-libs" = "latest"
+"pacman:pgcli" = "latest"
+
+# --- cli quality of life ---
+"pacman:ripgrep" = "latest"
+"pacman:fzf" = "latest"
+"pacman:fd" = "latest"
+"pacman:bat" = "latest"
+"pacman:tree" = "latest"
+"pacman:jq" = "latest"
+"pacman:wget" = "latest"
+"pacman:curl" = "latest"
+"pacman:unzip" = "latest"
+
+# --- monitoring (enabled as system services by scripts/bootstrap-linux) ---
+"pacman:htop" = "latest"
+"pacman:btop" = "latest"
+"pacman:atop" = "latest"
+"pacman:sysstat" = "latest"
+
+# --- media ---
+"pacman:ffmpeg" = "latest"
+
+# --- cloud ---
+"pacman:aws-cli-v2" = "latest"
+
+# --- secrets (fnox) ---
+"pacman:age" = "latest"
+
+# --- claude code sandboxing ---
+"pacman:bubblewrap" = "latest"
+"pacman:socat" = "latest"
+
+# --- debugging ---
+"pacman:tcpdump" = "latest"
+
+# --- 7. systemd user units ---------------------------------------------------
+# These used to be checked-in .service files stowed into ~/.config/systemd/user;
+# mise writes and enables them directly, namespaced as dev.mise.<name>.service.
+# `%h` is expanded by systemd, not mise.
+#
+# Anything that spawns subprocesses runs via `mise exec`: systemd user services
+# get PATH=/usr/local/bin:/usr/bin and nothing else, so node and bun would be
+# invisible to LSP servers, npx-based MCP servers and formatters.
+[bootstrap.linux.systemd.units.opencode]
+description = "OpenCode remote server"
+after = ["network-online.target"]
+type = "simple"
+exec_start = "%h/.local/bin/mise exec -- opencode serve --hostname 0.0.0.0 --port 4096"
+restart = "always"
+restart_sec = "5"
+wanted_by = ["default.target"]
+
+[bootstrap.linux.systemd.units.t3-code]
+description = "T3 Code remote environment server"
+after = ["network-online.target"]
+type = "simple"
+exec_start = "%h/.local/bin/mise exec -- npx --yes t3@nightly serve --host 0.0.0.0 --port 3773 --base-dir %h/.t3"
+restart = "always"
+restart_sec = "5"
+wanted_by = ["default.target"]
+
+# No mise exec: this spawns nothing, so it would be pure overhead.
+[bootstrap.linux.systemd.units.taildrop-inbox]
+description = "Drain Taildrop files into ~/inbox"
+after = ["network.target"]
+exec_start = "/usr/bin/tailscale file get --loop --conflict=rename %h/inbox"
+restart = "on-failure"
+restart_sec = "10"
+wanted_by = ["default.target"]
+
+# --- 8. login shell ----------------------------------------------------------
+# Runs `chsh -s` as you, not root, so the path must be in /etc/shells — the
+# fish package handles that at phase 1. Expect a password prompt on a fresh
+# machine; it's a no-op once set.
+[bootstrap.user]
+login_shell = "/usr/bin/fish"
+
+# --- 10. convergence task (platform half) ------------------------------------
+[tasks.platform]
+description = "Linux: tailscaled, user-session linger, monitoring services"
+run = "./scripts/bootstrap-linux"

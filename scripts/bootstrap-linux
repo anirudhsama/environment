@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Linux (Arch devbox) half of the bootstrap task — the `platform` task in
+# mise.linux.toml. Only runs on Linux, because mise only loads that config
+# there. Idempotent: runs on every `mise bootstrap`.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# Packages come from [bootstrap.packages]; these are the parts needing root.
+# mise's declarative systemd support covers *user* units only.
+
+# Tailscale daemon. `tailscale up --ssh --operator=ani` stays manual — it
+# blocks on an auth URL you have to open in a browser, so it can't live in an
+# idempotent task.
+sudo systemctl enable --now tailscaled
+
+# The four user units mise enables need linger to survive logout, and
+# taildrop-inbox needs its target directory to exist.
+mkdir -p "$HOME/inbox"
+sudo loginctl enable-linger "$USER"
+
+# 28 days of history: atop for process-level, sysstat/sar for CPU + memory.
+sudo sed -i -E 's/^HISTORY=.*/HISTORY=28/' /etc/conf.d/sysstat
+sudo systemctl enable --now atop.service sysstat.service
+
+echo "bootstrap: linux steps done."
