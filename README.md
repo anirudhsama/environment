@@ -49,9 +49,9 @@ enables `mise self-update`, and mise ships near-daily so every distro lags it.
 
 ## Notes
 
-- `mode = "symlink-each"` is the old `stow --no-folding` behaviour: real
-  directories, per-file symlinks, so runtime state lands beside the tracked
-  configs rather than inside the repo. Stow is no longer used.
+- `mode = "symlink-each"` creates real directories and symlinks each file
+  individually, so runtime state (claude sessions, `fish_variables`, lazy
+  plugins) lands beside the tracked configs rather than inside the repo.
 - `auto_env` must live in `.miserc.toml`. mise picks its config files before
   reading settings out of them, so setting it under `[settings]` is silently
   ignored. It becomes the default in mise 2027.6.0.
@@ -63,46 +63,3 @@ enables `mise self-update`, and mise ships near-daily so every distro lags it.
   Neovim restores from `lazy-lock.json` on first launch.
 - Homebrew packages aren't declared yet — the Mac's package set is still
   unmanaged. `mise bootstrap packages import` will seed the formulae list.
-
-## Migrating an existing machine
-
-One-time, on a machine with the old stow layout. **Do step 1 first**: the
-systemd units reference `%h/.local/bin/mise`, so converging earlier leaves them
-pointing at a binary that doesn't exist.
-
-```sh
-# 1. mise off the package manager. Confirm the new one runs before removing
-#    the old, so you're never without a working mise.
-curl https://mise.run | sh
-~/.local/bin/mise --version
-brew uninstall mise          # Mac
-sudo pacman -R mise          # devbox
-hash -r && which mise && mise self-update -y
-
-# 2. drop the stow symlinks — mise re-creates them
-stow -D -t ~ home
-
-# 3. devbox: retire the pre-mise units. mise namespaces its own as
-#    dev.mise.<name>.service, so these would otherwise keep running.
-#    paseo is dropped for good.
-systemctl --user disable --now opencode t3-code taildrop-inbox paseo
-rm -f ~/.config/systemd/user/{opencode,t3-code,taildrop-inbox,paseo}.service
-systemctl --user daemon-reload
-
-# 4. devbox: claude-code moves to its native installer
-paru -Rns claude-code
-
-# 5. converge, then take uv off its stale pinned version
-mise bootstrap
-mise upgrade uv
-```
-
-Then trim the devbox's `~/.bashrc`: drop the duplicate `ANDROID_HOME` block
-(`mise env` no longer exports any `ANDROID_*`) and the `ls`/`grep` aliases and
-`PS1`, which never run under fish. Keep the first `ANDROID_HOME` block so bash
-still sees the SDK — fish gets it from `config.fish` now.
-
-The AUR packages this retires — `bun-bin`, `claude-code`, `doppler-cli-bin`,
-`hasura-cli-bin`, `opencode-bin`, `openai-codex-bin` — can go once
-`mise bootstrap` has installed their replacements. Keep paru itself as a `-Syu`
-wrapper and escape hatch; nothing in provisioning needs it.

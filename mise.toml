@@ -31,10 +31,9 @@ min_version = "2026.7.0"
 # are on PATH everywhere, not just inside this repo.
 
 # --- 3. dotfiles -------------------------------------------------------------
-# Mirror of ~, applied with symlink-each: real directories, per-file symlinks.
-# That is the `stow --no-folding` behaviour this replaces — runtime state
-# (claude sessions, fish_variables, lazy plugins) lands next to the tracked
-# configs instead of inside the repo.
+# Mirror of ~, applied with symlink-each: real directories, per-file symlinks,
+# so runtime state (claude sessions, fish_variables, lazy plugins) lands next to
+# the tracked configs instead of inside the repo.
 [dotfiles]
 "~/.gitattributes" = { source = "home/.gitattributes", mode = "symlink" }
 "~/.gitconfig" = { source = "home/.gitconfig", mode = "symlink" }

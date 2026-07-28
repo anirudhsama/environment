@@ -78,8 +78,7 @@
 "pacman:tcpdump" = "latest"
 
 # --- 7. systemd user units ---------------------------------------------------
-# These used to be checked-in .service files stowed into ~/.config/systemd/user;
-# mise writes and enables them directly, namespaced as dev.mise.<name>.service.
+# mise writes and enables these directly, namespaced as dev.mise.<name>.service.
 # `%h` is expanded by systemd, not mise.
 #
 # Anything that spawns subprocesses runs via `mise exec`: systemd user services
