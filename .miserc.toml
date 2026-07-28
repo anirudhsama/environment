@@ -1,0 +1,11 @@
+# Enables mise's platform config environments, so mise.linux.toml and
+# mise.macos.toml load automatically alongside mise.toml. mise derives the
+# active envs from the platform: {os_family}, {os}, {os}-{arch} — i.e.
+# `unix`, `linux`/`macos`, `macos-arm64`.
+#
+# This has to live in .miserc.toml, not in [settings]: mise decides which
+# config files to load before it reads settings out of them, so `auto_env`
+# set in mise.toml or the global config is ignored.
+#
+# Defaults to enabled in mise 2027.6.0; until then it needs saying.
+auto_env = true

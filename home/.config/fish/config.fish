@@ -56,6 +56,23 @@ alias vim="nvim"
 alias yolo="claude --dangerously-skip-permissions"
 alias yolox="codex -c model_reasoning_effort=high --dangerously-bypass-approvals-and-sandbox -c model_reasoning_summary=detailed -c model_supports_reasoning_summaries=true"
 
+# Android SDK (devbox only; the Mac's lives at ~/Library/Android/sdk). This
+# used to be set in ~/.bashrc alone, so fish — the login shell — never had it
+# and Expo/RN work silently behaved differently between the two shells.
+if test (uname) = Linux; and test -d $HOME/android-sdk
+    set -gx ANDROID_HOME $HOME/android-sdk
+    set -gx ANDROID_SDK_ROOT $ANDROID_HOME
+    fish_add_path $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator $ANDROID_HOME/cmdline-tools/latest/bin
+end
+
+# PATH additions must precede the mise block below: mise itself lives in
+# ~/.local/bin (vendor installer, not a package), so `command -q mise` fails
+# and mise never activates if this runs after it.
+fish_add_path ~/.local/bin
+
+# bun global installs (bun install -g -> ~/.bun/bin); node-version-independent
+fish_add_path ~/.bun/bin
+
 # mise (dev runtimes: node, bun, fnox, ...)
 if command -q mise
     mise activate fish | source
@@ -72,12 +89,6 @@ if test (uname) = Darwin
     # opencode
     fish_add_path /Users/ani/.opencode/bin
 end
-
-# amp
-fish_add_path ~/.local/bin
-
-# bun global installs (bun install -g -> ~/.bun/bin); node-version-independent
-fish_add_path ~/.bun/bin
 
 # fnox shell integration
 if status is-interactive

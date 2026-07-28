@@ -1,0 +1,25 @@
+# Mac. Loaded automatically on macOS via auto_env (see .miserc.toml).
+# Sections ordered the way `mise bootstrap` runs them — see mise.toml for the
+# full phase list.
+
+# --- 1. system packages ------------------------------------------------------
+# brew:/brew-cask: entries land here in a later pass. Until then the Mac's
+# package set stays unmanaged — `mise bootstrap packages import` will generate
+# the formulae list when we're ready.
+#
+# Note for that pass: Homebrew does NOT add fish to /etc/shells the way Arch's
+# package does, so a fresh Mac needs that line present before phase 8 can chsh.
+
+# --- 6. LaunchAgents ---------------------------------------------------------
+# [bootstrap.macos.launchd.agents] is deliberately unused. The DevboxDrop agent
+# is WatchPaths driven and mise's launchd schema has no WatchPaths or
+# ThrottleInterval, so scripts/bootstrap-macos installs the plist by hand.
+
+# --- 8. login shell ----------------------------------------------------------
+[bootstrap.user]
+login_shell = "/opt/homebrew/bin/fish"
+
+# --- 10. convergence task (platform half) ------------------------------------
+[tasks.platform]
+description = "macOS: DevboxDrop LaunchAgent"
+run = "./scripts/bootstrap-macos"

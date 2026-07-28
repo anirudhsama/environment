@@ -1,9 +1,0 @@
-# AUR packages, one per line. Comments and blank lines ignored.
-# Applied by bootstrap.sh with: paru -S --noconfirm --needed (built/installed as ani)
-
-bun-bin
-claude-code
-doppler-cli-bin
-hasura-cli-bin
-1password-cli
-opencode-bin

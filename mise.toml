@@ -1,0 +1,72 @@
+min_version = "2026.7.0"
+
+# Machine provisioning, shared across both machines. Run `mise bootstrap` from
+# this directory to make the machine match the repo. Idempotent — it converges,
+# so re-run it after every pull.
+#
+# Sections below are ordered the way `mise bootstrap` runs them:
+#
+#   1  [bootstrap.packages]              OS packages          (per-platform file)
+#   2  [bootstrap.repos]                 git checkouts        (unused)
+#   3  [dotfiles]                        symlink ~ from home/
+#   4  [bootstrap.mise_shell_activate]   shell activation
+#   5  [bootstrap.macos.defaults]        macOS defaults       (unused)
+#   6  [bootstrap.macos.launchd.agents]  LaunchAgents         (unused, see below)
+#   7  [bootstrap.linux.systemd.units]   systemd user units   (per-platform file)
+#   8  [bootstrap.user]                  login shell          (per-platform file)
+#   9  [tools]                           from the global config
+#   10 [tasks.bootstrap]                 the convergence task
+#
+# Platform-specific halves live in mise.linux.toml and mise.macos.toml, loaded
+# automatically via auto_env (see .miserc.toml). Anything that applies to one OS
+# belongs there, not behind a `uname` test in here.
+#
+# Sourcing policy, in order of preference:
+#   1. OS package (pacman / brew) when it exists and tracks upstream
+#   2. mise [tools] when it isn't packaged, the distro lags, or it's npm-only
+#   3. a vendor self-updater, only where the vendor recommends it (claude-code,
+#      and mise itself)
+#
+# Cross-machine CLIs and runtimes live in home/.config/mise/config.toml so they
+# are on PATH everywhere, not just inside this repo.
+
+# --- 3. dotfiles -------------------------------------------------------------
+# Mirror of ~, applied with symlink-each: real directories, per-file symlinks.
+# That is the `stow --no-folding` behaviour this replaces — runtime state
+# (claude sessions, fish_variables, lazy plugins) lands next to the tracked
+# configs instead of inside the repo.
+[dotfiles]
+"~/.gitattributes" = { source = "home/.gitattributes", mode = "symlink" }
+"~/.gitconfig" = { source = "home/.gitconfig", mode = "symlink" }
+"~/.claude" = { source = "home/.claude", mode = "symlink-each" }
+"~/.codex" = { source = "home/.codex", mode = "symlink-each" }
+"~/.config/atuin" = { source = "home/.config/atuin", mode = "symlink-each" }
+"~/.config/fish" = { source = "home/.config/fish", mode = "symlink-each" }
+"~/.config/ghostty" = { source = "home/.config/ghostty", mode = "symlink-each" }
+"~/.config/git" = { source = "home/.config/git", mode = "symlink-each" }
+"~/.config/herdr" = { source = "home/.config/herdr", mode = "symlink-each" }
+"~/.config/hunk" = { source = "home/.config/hunk", mode = "symlink-each" }
+"~/.config/mise" = { source = "home/.config/mise", mode = "symlink-each" }
+"~/.config/nvim" = { source = "home/.config/nvim", mode = "symlink-each" }
+"~/.local/bin" = { source = "home/.local/bin", mode = "symlink-each" }
+
+# --- 4. shell activation -----------------------------------------------------
+# Needed because mise lives at ~/.local/bin/mise (vendor installer) and Arch's
+# /etc/profile only appends /usr/local/bin — without this block an interactive
+# bash session has no mise at all.
+#
+# Only bash: ~/.bashrc isn't repo-managed (the two machines share nothing in
+# it), whereas config.fish is a tracked dotfile that adds ~/.local/bin to PATH
+# and activates mise itself.
+[bootstrap.mise_shell_activate]
+bashrc = "activate"
+
+# --- 10. convergence task ----------------------------------------------------
+# Steps that aren't declarative and aren't OS-specific. The platform half is a
+# separate task defined in mise.{linux,macos}.toml and pulled in via depends,
+# so neither script needs a `uname` branch. Runs on every `mise bootstrap`, so
+# it stays idempotent.
+[tasks.bootstrap]
+description = "Post-bootstrap convergence (fisher, claude-code, herdr, MCPs)"
+depends = ["platform"]
+run = "./scripts/bootstrap-common"

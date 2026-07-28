@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Convergence steps that aren't declarative and aren't OS-specific.
+# Runs on every `mise bootstrap` (step 10), so every step must be idempotent.
+#
+# The platform half lives in scripts/bootstrap-{linux,macos}, wired up as the
+# `platform` task in mise.{linux,macos}.toml — no `uname` branching here.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# --- fish plugins (fisher reads home/.config/fish/fish_plugins) --------------
+if command -v fish >/dev/null 2>&1; then
+  fish -c 'functions -q fisher; or begin; curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source; and fisher install jorgebucaran/fisher; end'
+  fish -c 'fisher update'
+
+  # Tide's config lives in fish universal variables, not a file we can symlink,
+  # so it has to be replayed. 156 idempotent `set -U` calls; must run after
+  # fisher has installed tide. This makes the repo authoritative — interactive
+  # `tide configure` tweaks are overwritten on the next bootstrap.
+  fish -c 'source scripts/tide-settings.fish'
+fi
+
+# --- claude-code: vendor's native installer, per Anthropic's docs ------------
+# The only agent CLI on a self-updater. It's the recommended install method and
+# the only one that auto-updates; every package-manager route (AUR, brew, apt)
+# is manual-upgrade. Install once, then let it update itself.
+if [ ! -x "$HOME/.local/bin/claude" ]; then
+  curl -fsSL https://claude.ai/install.sh | bash
+fi
+
+# --- herdr ------------------------------------------------------------------
+# Native installer rather than a package: `herdr update --handoff` upgrades the
+# server without killing running agent sessions, which package installs can't.
+if ! command -v herdr >/dev/null 2>&1; then
+  curl -fsSL https://herdr.dev/install.sh | sh
+  herdr integration install claude && herdr integration install codex || true
+fi
+
+# --- common global MCP servers for Claude Code and Codex ---------------------
+scripts/sync-common-mcps
+
+# --- global tools -----------------------------------------------------------
+# On a fresh machine the dotfiles phase links ~/.config/mise/config.toml during
+# THIS run, after mise already loaded its config. Re-running install as a
+# subprocess picks up the newly-linked global [tools].
+mise install
+
+echo "bootstrap: common steps done."
