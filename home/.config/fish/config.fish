@@ -65,6 +65,14 @@ if test (uname) = Linux; and test -d $HOME/android-sdk
     fish_add_path $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator $ANDROID_HOME/cmdline-tools/latest/bin
 end
 
+# Gradle and the Android Gradle Plugin want JAVA_HOME, not just java on PATH.
+# /usr/lib/jvm/default is Arch's alternatives symlink, so this follows JDK
+# upgrades and `archlinux-java set` instead of pinning a version. Inert on the
+# Mac, which has no working JDK on PATH.
+if test -d /usr/lib/jvm/default
+    set -gx JAVA_HOME /usr/lib/jvm/default
+end
+
 # PATH additions must precede the mise block below: mise itself lives in
 # ~/.local/bin (vendor installer, not a package), so `command -q mise` fails
 # and mise never activates if this runs after it.

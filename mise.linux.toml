@@ -33,6 +33,13 @@
 # --- editor ---
 "pacman:neovim" = "latest"
 
+# --- android / jvm ---
+# The JDK the Android Gradle Plugin runs on. Arch's package registers with
+# archlinux-java, which maintains the /usr/lib/jvm/default symlink config.fish
+# points JAVA_HOME at. A project needing a different JDK declares it in its own
+# mise.toml. The SDK itself (~9 GB) is not a package — see scripts/android-sdk.
+"pacman:jdk17-openjdk" = "latest"
+
 # --- dev tooling ---
 "pacman:github-cli" = "latest"
 "pacman:sentry-cli" = "latest"

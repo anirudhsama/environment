@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Restore the Android SDK component set on the devbox.
+#
+# Deliberately NOT part of `mise bootstrap`: this fetches ~9 GB from Google and
+# accepts licences, which is not something a routine converge should do. Run it
+# by hand when rebuilding, or to add a component after editing the list below.
+#
+# The SDK tree itself can't be tracked — but this list is what makes it
+# reproducible, which is the part that actually matters.
+#
+# Idempotent: sdkmanager skips anything already installed.
+set -euo pipefail
+
+export ANDROID_HOME="${ANDROID_HOME:-$HOME/android-sdk}"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+
+# Keep in sync with `sdkmanager --list_installed`.
+COMPONENTS=(
+  "cmdline-tools;latest"      # keep current, or it warns about newer SDK XML
+  "platform-tools"
+  "emulator"                  # usable here: /dev/kvm is present on this VM
+  "build-tools;36.0.0"        # one build-tools and one NDK, deliberately —
+  "ndk;27.1.12297006"         # the older copies cost ~2 GB and nothing pins them
+  "platforms;android-36"
+  "platforms;android-35"
+  "platforms;android-34"
+  "platforms;android-31"
+  "cmake;3.30.5"
+  "cmake;3.22.1"
+  "system-images;android-35;google_apis;x86_64"
+)
+
+if [ ! -x "$sdkmanager" ]; then
+  cat >&2 <<EOF
+cmdline-tools is not installed, and its download URL is a build number that
+goes stale — so this script won't guess at it.
+
+Grab "Command line tools only" for Linux from
+  https://developer.android.com/studio#command-line-tools-only
+then:
+  mkdir -p "$ANDROID_HOME/cmdline-tools"
+  unzip -q commandlinetools-linux-*.zip -d "$ANDROID_HOME/cmdline-tools"
+  mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+
+and re-run this script. It self-updates from then on.
+EOF
+  exit 1
+fi
+
+echo ">> accepting licences"
+yes | "$sdkmanager" --licenses >/dev/null
+
+echo ">> installing ${#COMPONENTS[@]} components (already-present ones are skipped)"
+"$sdkmanager" --install "${COMPONENTS[@]}"
+
+echo ">> installed:"
+"$sdkmanager" --list_installed
