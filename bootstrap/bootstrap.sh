@@ -72,8 +72,9 @@ sudo -u ani bash -c 'curl -fsSL https://mise.run | sh'
 
 echo ">> DONE. Next steps:"
 echo ">>   1. git clone https://github.com/<you>/environment ~/dev/environment"
-# Absolute path: Arch's /etc/profile doesn't put ~/.local/bin on PATH, and
-# mise's own shell activation isn't written until `mise bootstrap` runs.
+# Absolute path: Arch's /etc/profile doesn't put ~/.local/bin on PATH, and the
+# tracked ~/.bashrc isn't linked until `mise bootstrap` runs.
+echo ">>      If ~/.bashrc exists: mv ~/.bashrc ~/.bashrc.pre-environment"
 echo ">>      cd ~/dev/environment && ~/.local/bin/mise trust . && ~/.local/bin/mise bootstrap"
 echo ">>   2. sudo tailscale up --ssh --operator=ani  (auth in browser; disable key expiry in admin console)"
 echo ">>   3. verify tailnet ssh from another device"

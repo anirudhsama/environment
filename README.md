@@ -4,8 +4,8 @@ Dotfiles + devbox provisioning, [thdxr/environment](https://github.com/thdxr/env
 
 | | |
 |---|---|
-| `mise.toml` | shared provisioning: dotfiles, shell activation, the convergence task |
-| `mise.linux.toml` / `mise.macos.toml` | per-platform: packages, systemd units, login shell |
+| `mise.toml` | shared provisioning: dotfiles and the convergence task |
+| `mise.linux.toml` / `mise.macos.toml` | per-platform: packages, dotfiles, services, login shell |
 | `.miserc.toml` | `auto_env`, which is what loads the two files above |
 | `home/` | mirror of `~`, symlinked in by `[dotfiles]` |
 | `home/.config/mise/config.toml` | global tools — runtimes and cross-machine CLIs |
@@ -18,6 +18,14 @@ Dotfiles + devbox provisioning, [thdxr/environment](https://github.com/thdxr/env
 curl https://mise.run | sh
 git clone https://github.com/<you>/environment ~/dev/environment
 cd ~/dev/environment && mise trust . && mise bootstrap
+```
+
+If `~/.bashrc` already exists, move it aside before the first bootstrap so
+mise can link the tracked Linux version:
+
+```sh
+mv ~/.bashrc ~/.bashrc.pre-environment
+mise bootstrap
 ```
 
 Install mise from `mise.run`, **not** brew or pacman — it's the only route that
@@ -44,7 +52,6 @@ enables `mise self-update`, and mise ships near-daily so every distro lags it.
 | `~/.gitconfig.local` | commit signing program, `commit.gpgsign`, maintenance repos |
 | `~/.claude/settings.local.json` | machine-local Claude Code settings |
 | `~/.codex/config.toml` | Codex rewrites this at runtime; seed from `home/.codex/config.toml.example` |
-| `~/.bashrc` | the two machines share nothing in it; mise maintains only its own block |
 | `~/.codex/auth.json`, `~/.local/share/atuin/key` | credentials — back up via 1Password, not git |
 
 ## Notes

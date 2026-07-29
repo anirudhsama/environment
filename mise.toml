@@ -9,7 +9,7 @@ min_version = "2026.7.0"
 #   1  [bootstrap.packages]              OS packages          (per-platform file)
 #   2  [bootstrap.repos]                 git checkouts        (unused)
 #   3  [dotfiles]                        symlink ~ from home/
-#   4  [bootstrap.mise_shell_activate]   shell activation
+#   4  [bootstrap.mise_shell_activate]   unused (Linux bashrc is a dotfile)
 #   5  [bootstrap.macos.defaults]        macOS defaults       (unused)
 #   6  [bootstrap.macos.launchd.agents]  LaunchAgents         (unused, see below)
 #   7  [bootstrap.linux.systemd.units]   systemd user units   (per-platform file)
@@ -48,17 +48,6 @@ min_version = "2026.7.0"
 "~/.config/mise" = { source = "home/.config/mise", mode = "symlink-each" }
 "~/.config/nvim" = { source = "home/.config/nvim", mode = "symlink-each" }
 "~/.local/bin" = { source = "home/.local/bin", mode = "symlink-each" }
-
-# --- 4. shell activation -----------------------------------------------------
-# Needed because mise lives at ~/.local/bin/mise (vendor installer) and Arch's
-# /etc/profile only appends /usr/local/bin — without this block an interactive
-# bash session has no mise at all.
-#
-# Only bash: ~/.bashrc isn't repo-managed (the two machines share nothing in
-# it), whereas config.fish is a tracked dotfile that adds ~/.local/bin to PATH
-# and activates mise itself.
-[bootstrap.mise_shell_activate]
-bashrc = "activate"
 
 # --- 10. convergence task ----------------------------------------------------
 # Steps that aren't declarative and aren't OS-specific. The platform half is a

@@ -89,6 +89,7 @@
 # platform config effectively is one — this only applies where mise loads
 # mise.linux.toml.
 [dotfiles]
+"~/.bashrc" = { source = "home/.bashrc", mode = "symlink" }
 "~/.gradle/gradle.properties" = { source = "home/.gradle/gradle.properties.linux", mode = "symlink" }
 
 # --- 7. systemd user units ---------------------------------------------------
