@@ -9,3 +9,7 @@
 #
 # Defaults to enabled in mise 2027.6.0; until then it needs saying.
 auto_env = true
+
+# home/ mirrors $HOME and contains the symlink source for the global mise
+# config. Do not also discover that source as project configuration.
+ceiling_paths = ["{{ config_root }}/home"]
