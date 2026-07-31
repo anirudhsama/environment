@@ -37,6 +37,7 @@ min_version = "2026.7.0"
 [dotfiles]
 "~/.gitattributes" = { source = "home/.gitattributes", mode = "symlink" }
 "~/.gitconfig" = { source = "home/.gitconfig", mode = "symlink" }
+"~/.agents" = { source = "home/.agents", mode = "symlink-each" }
 "~/.claude" = { source = "home/.claude", mode = "symlink-each" }
 "~/.codex" = { source = "home/.codex", mode = "symlink-each" }
 "~/.config/atuin" = { source = "home/.config/atuin", mode = "symlink-each" }
