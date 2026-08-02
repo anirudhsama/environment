@@ -41,6 +41,18 @@ scripts/grok-pin-install
 # --- common global MCP servers for Claude Code and Codex ---------------------
 scripts/sync-common-mcps
 
+# --- lean reference clones under ~/code/references ---------------------------
+# Platform scripts ensure the layout (~/code on Linux; ~/code -> ~/Documents/code
+# on macOS). This populates/refreshes the shallow clones. Daily refresh is a
+# systemd timer (Linux) / launchd agent (macOS).
+if [[ -x "$HOME/.local/bin/sync-reference-repos" ]]; then
+  "$HOME/.local/bin/sync-reference-repos"
+elif [[ -x ./home/.local/bin/sync-reference-repos ]]; then
+  # First bootstrap, before the symlink-each dotfiles phase has been picked up
+  # by a fresh shell — the tracked file is still the source of truth.
+  ./home/.local/bin/sync-reference-repos
+fi
+
 # --- global tools -----------------------------------------------------------
 # On a fresh machine the dotfiles phase links ~/.config/mise/config.toml during
 # THIS run, after mise already loaded its config. Re-running install as a

@@ -7,11 +7,14 @@ min_version = "2026.7.0"
 # Sections below are ordered the way `mise bootstrap` runs them:
 #
 #   1  [bootstrap.packages]              OS packages          (per-platform file)
-#   2  [bootstrap.repos]                 git checkouts        (unused)
+#   2  [bootstrap.repos]                 git checkouts        (unused — lean
+#                                        reference clones need --depth 1, which
+#                                        bootstrap.repos does not support; see
+#                                        home/.local/bin/sync-reference-repos)
 #   3  [dotfiles]                        symlink ~ from home/
 #   4  [bootstrap.mise_shell_activate]   unused (Linux bashrc is a dotfile)
 #   5  [bootstrap.macos.defaults]        macOS defaults       (unused)
-#   6  [bootstrap.macos.launchd.agents]  LaunchAgents         (unused, see below)
+#   6  [bootstrap.macos.launchd.agents]  LaunchAgents         (per-platform file)
 #   7  [bootstrap.linux.systemd.units]   systemd user units   (per-platform file)
 #   8  [bootstrap.user]                  login shell          (per-platform file)
 #   9  [tools]                           from the global config

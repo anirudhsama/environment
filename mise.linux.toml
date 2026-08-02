@@ -126,6 +126,28 @@ restart = "on-failure"
 restart_sec = "10"
 wanted_by = ["default.target"]
 
+# Daily shallow-sync of ~/code/references. oneshot + timer pair; mise renders
+# entries with timer keys as .timer units targeting the sibling service.
+[bootstrap.linux.systemd.units.reference-repos]
+description = "Sync lean reference repos under ~/code/references"
+after = ["network-online.target"]
+type = "oneshot"
+exec_start = "%h/.local/bin/sync-reference-repos"
+# User units get a bare PATH; git is under /usr/bin on Arch.
+environment = { PATH = "/usr/local/bin:/usr/bin:/bin" }
+standard_output = "journal"
+standard_error = "journal"
+# oneshot: do not leave it "running"; apply should not try to keep it up.
+start = false
+wanted_by = []
+
+[bootstrap.linux.systemd.units.reference-repos-timer]
+description = "Daily lean reference repo sync"
+on_calendar = "daily"
+persistent = true
+randomized_delay_sec = "30m"
+unit = "reference-repos"
+
 # --- 8. login shell ----------------------------------------------------------
 # Runs `chsh -s` as you, not root, so the path must be in /etc/shells — the
 # fish package handles that at phase 1. Expect a password prompt on a fresh
@@ -135,5 +157,5 @@ login_shell = "/usr/bin/fish"
 
 # --- 10. convergence task (platform half) ------------------------------------
 [tasks.platform]
-description = "Linux: tailscaled, user-session linger, monitoring services"
+description = "Linux: tailscaled, linger, monitoring, ~/code/references"
 run = "./scripts/bootstrap-linux"

@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# Shallow clones of frequently-referenced public repos under ~/code/references.
+# Idempotent. On update, hard-resets to origin/<branch> — these are disposable
+# reference trees, not working copies. No GitHub auth required (public HTTPS).
+#
+# Invoked by: mise bootstrap (via bootstrap-common), a daily systemd timer on
+# Linux, and a launchd agent on macOS.
+set -euo pipefail
+
+# name|url|branch  (branch = upstream default)
+REPOS=(
+  "effect|https://github.com/effect-ts/effect.git|main"
+  "opencode|https://github.com/anomalyco/opencode.git|dev"
+  "t3code|https://github.com/pingdotgg/t3code.git|main"
+)
+
+dry_run=0
+if [[ "${1:-}" == "--dry-run" ]]; then
+  dry_run=1
+elif [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "usage: sync-reference-repos [--dry-run]" >&2
+  exit 0
+elif [[ $# -gt 0 ]]; then
+  echo "usage: sync-reference-repos [--dry-run]" >&2
+  exit 2
+fi
+
+run() {
+  if [[ "$dry_run" -eq 1 ]]; then
+    # stderr so command capture (ensure_layout) only sees the path
+    printf '+' >&2; printf ' %q' "$@" >&2; echo >&2
+  else
+    "$@"
+  fi
+}
+
+# Linux: real ~/code. macOS: ~/code -> ~/Documents/code when possible.
+ensure_layout() {
+  local refs
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    local docs="$HOME/Documents/code"
+    run mkdir -p "$docs/references"
+    if [[ ! -e "$HOME/code" ]]; then
+      run ln -s "$docs" "$HOME/code"
+    elif [[ -L "$HOME/code" ]]; then
+      local target
+      target=$(readlink "$HOME/code")
+      if [[ "$target" != "$docs" && "$target" != "Documents/code" ]]; then
+        echo "warning: ~/code is a symlink to $target (expected $docs); using it as-is" >&2
+      fi
+      run mkdir -p "$HOME/code/references"
+    elif [[ -d "$HOME/code" ]]; then
+      echo "warning: ~/code is a real directory; not replacing with symlink to $docs" >&2
+      run mkdir -p "$HOME/code/references"
+    else
+      echo "error: ~/code exists and is neither a directory nor a symlink" >&2
+      exit 1
+    fi
+  else
+    run mkdir -p "$HOME/code/references"
+  fi
+  refs="$HOME/code/references"
+  printf '%s\n' "$refs"
+}
+
+sync_one() {
+  local name="$1" url="$2" branch="$3" root="$4"
+  local dest="$root/$name"
+
+  if [[ ! -e "$dest" ]]; then
+    echo ">> clone $name ($branch)"
+    run git clone --depth 1 --single-branch --branch "$branch" "$url" "$dest"
+    return 0
+  fi
+
+  if [[ ! -d "$dest/.git" ]]; then
+    echo "error: $dest exists but is not a git repo" >&2
+    return 1
+  fi
+
+  # Origin must match; refuse to touch a checkout of something else.
+  local origin
+  origin=$(git -C "$dest" remote get-url origin 2>/dev/null || true)
+  # Compare transport-agnostically enough for https vs git@ of the same path.
+  local want_path origin_path
+  want_path=${url#https://github.com/}
+  want_path=${want_path%.git}
+  origin_path=$origin
+  origin_path=${origin_path#https://github.com/}
+  origin_path=${origin_path#git@github.com:}
+  origin_path=${origin_path%.git}
+  if [[ "$origin_path" != "$want_path" ]]; then
+    echo "error: $dest origin is $origin (expected $url); refusing to update" >&2
+    return 1
+  fi
+
+  echo ">> update $name ($branch)"
+  # Stay shallow: fetch only the tip of the tracked branch, then hard-reset.
+  run git -C "$dest" remote set-branches origin "$branch"
+  run git -C "$dest" fetch --depth 1 origin "$branch"
+  run git -C "$dest" checkout -B "$branch" "origin/$branch"
+  run git -C "$dest" reset --hard "origin/$branch"
+  # Drop any leftover unreachable objects from prior tips.
+  run git -C "$dest" reflog expire --expire=now --all
+  run git -C "$dest" gc --prune=now --quiet
+}
+
+main() {
+  if ! command -v git >/dev/null 2>&1; then
+    echo "error: git is required" >&2
+    exit 1
+  fi
+
+  local root failed=0
+  root=$(ensure_layout)
+
+  local entry name url branch
+  for entry in "${REPOS[@]}"; do
+    IFS='|' read -r name url branch <<<"$entry"
+    if ! sync_one "$name" "$url" "$branch" "$root"; then
+      failed=1
+    fi
+  done
+
+  if [[ "$failed" -ne 0 ]]; then
+    echo "sync-reference-repos: one or more repos failed" >&2
+    exit 1
+  fi
+  echo "sync-reference-repos: done ($root)"
+}
+
+main
