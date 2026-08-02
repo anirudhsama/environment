@@ -5,17 +5,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# ~/code is the stable path agents use; on the Mac it lives under Documents
-# (iCloud-friendly) and ~/code is a symlink. Don't clobber a real ~/code dir.
-mkdir -p "$HOME/Documents/code/references"
-if [[ ! -e "$HOME/code" ]]; then
-  ln -s "$HOME/Documents/code" "$HOME/code"
-elif [[ -L "$HOME/code" ]]; then
-  :
-elif [[ -d "$HOME/code" ]]; then
-  echo "bootstrap: warning: ~/code is a real directory; expected symlink to ~/Documents/code" >&2
-  mkdir -p "$HOME/code/references"
-fi
+# Same path as Linux: real ~/code/references (no Documents indirection).
+mkdir -p "$HOME/code/references"
 
 # DevboxDrop LaunchAgent. Not expressible in [bootstrap.macos.launchd.agents]:
 # the agent is WatchPaths driven and mise's launchd schema has no WatchPaths or

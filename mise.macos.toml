@@ -38,5 +38,5 @@ login_shell = "/opt/homebrew/bin/fish"
 
 # --- 10. convergence task (platform half) ------------------------------------
 [tasks.platform]
-description = "macOS: ~/code layout, DevboxDrop, reference-repos libexec"
+description = "macOS: DevboxDrop LaunchAgent, reference-repos libexec"
 run = "./scripts/bootstrap-macos"

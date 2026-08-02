@@ -42,9 +42,8 @@ scripts/grok-pin-install
 scripts/sync-common-mcps
 
 # --- lean reference clones under ~/code/references ---------------------------
-# Platform scripts ensure the layout (~/code on Linux; ~/code -> ~/Documents/code
-# on macOS). This populates/refreshes the shallow clones. Daily refresh is a
-# systemd timer (Linux) / launchd agent (macOS).
+# Same real path on both machines. Daily refresh: systemd timer (Linux) /
+# launchd agent (macOS).
 if [[ -x "$HOME/.local/bin/sync-reference-repos" ]]; then
   "$HOME/.local/bin/sync-reference-repos"
 elif [[ -x ./home/.local/bin/sync-reference-repos ]]; then

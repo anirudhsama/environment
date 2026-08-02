@@ -68,9 +68,8 @@ enables `mise self-update`, and mise ships near-daily so every distro lags it.
   driven and mise's launchd schema has no `WatchPaths`/`ThrottleInterval`.
 - Lean reference clones live in `~/code/references` (effect, opencode, t3code),
   maintained by `sync-reference-repos`. Bootstrap populates them; a daily
-  systemd timer (Linux) / launchd agent (macOS) refreshes them. On the Mac,
-  `~/code` is a symlink to `~/Documents/code`. Not `[bootstrap.repos]` —
-  mise can't do `--depth 1`.
+  systemd timer (Linux) / launchd agent (macOS) refreshes them. Not
+  `[bootstrap.repos]` — mise can't do `--depth 1`.
 - Fish plugins are fisher-managed and untracked; `fish_plugins` is the lockfile.
   Neovim restores from `lazy-lock.json` on first launch.
 - Homebrew packages aren't declared yet — the Mac's package set is still
