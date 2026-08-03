@@ -59,6 +59,9 @@ enables `mise self-update`, and mise ships near-daily so every distro lags it.
 - `mode = "symlink-each"` creates real directories and symlinks each file
   individually, so runtime state (claude sessions, `fish_variables`, lazy
   plugins) lands beside the tracked configs rather than inside the repo.
+- `~/.agents/skills` is a whole-directory `symlink` instead: Codex rejects
+  skills whose `SKILL.md` is a file symlink. The dir link keeps skill files
+  real; `~/.agents` itself stays a real directory for untracked state.
 - `auto_env` must live in `.miserc.toml`. mise picks its config files before
   reading settings out of them, so setting it under `[settings]` is silently
   ignored. It becomes the default in mise 2027.6.0.

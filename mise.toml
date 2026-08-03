@@ -37,10 +37,14 @@ min_version = "2026.7.0"
 # Mirror of ~, applied with symlink-each: real directories, per-file symlinks,
 # so runtime state (claude sessions, fish_variables, lazy plugins) lands next to
 # the tracked configs instead of inside the repo.
+#
+# ~/.agents/skills is a directory symlink (not symlink-each): Codex rejects
+# skills whose SKILL.md is itself a symlink. A dir link keeps leaf skill files
+# real while leaving ~/.agents a real directory for untracked runtime state.
 [dotfiles]
 "~/.gitattributes" = { source = "home/.gitattributes", mode = "symlink" }
 "~/.gitconfig" = { source = "home/.gitconfig", mode = "symlink" }
-"~/.agents" = { source = "home/.agents", mode = "symlink-each" }
+"~/.agents/skills" = { source = "home/.agents/skills", mode = "symlink" }
 "~/.claude" = { source = "home/.claude", mode = "symlink-each" }
 "~/.codex" = { source = "home/.codex", mode = "symlink-each" }
 "~/.config/atuin" = { source = "home/.config/atuin", mode = "symlink-each" }
