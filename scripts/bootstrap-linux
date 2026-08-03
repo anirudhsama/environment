@@ -13,9 +13,9 @@ cd "$(dirname "$0")/.."
 # idempotent task.
 sudo systemctl enable --now tailscaled
 
-# The four user units mise enables need linger to survive logout, and
-# taildrop-inbox needs its target directory to exist.
-mkdir -p "$HOME/inbox"
+# The user units mise enables need linger to survive logout, and
+# taildrop-inbox / reference-repos need their target directories to exist.
+mkdir -p "$HOME/inbox" "$HOME/code/references"
 sudo loginctl enable-linger "$USER"
 
 # 28 days of history: atop for process-level, sysstat/sar for CPU + memory.

@@ -18,9 +18,19 @@
 "~/.gradle/gradle.properties" = { source = "home/.gradle/gradle.properties.macos", mode = "symlink" }
 
 # --- 6. LaunchAgents ---------------------------------------------------------
-# [bootstrap.macos.launchd.agents] is deliberately unused. The DevboxDrop agent
-# is WatchPaths driven and mise's launchd schema has no WatchPaths or
-# ThrottleInterval, so scripts/bootstrap-macos installs the plist by hand.
+# DevboxDrop stays hand-installed: it's WatchPaths driven and mise's launchd
+# schema has no WatchPaths or ThrottleInterval (see scripts/bootstrap-macos).
+#
+# reference-repos is calendar-driven and fits the schema. Program points at the
+# real libexec copy (installed by bootstrap-macos) so launchd is not denied TCC
+# access via a symlink into Documents.
+[bootstrap.macos.launchd.agents.reference-repos]
+program = "~/.local/libexec/sync-reference-repos"
+run_at_load = false
+start_calendar_interval = { hour = 6, minute = 0 }
+environment = { PATH = "/opt/homebrew/bin:/usr/bin:/bin" }
+stdout_path = "~/Library/Logs/reference-repos.log"
+stderr_path = "~/Library/Logs/reference-repos.log"
 
 # --- 8. login shell ----------------------------------------------------------
 [bootstrap.user]
@@ -28,5 +38,5 @@ login_shell = "/opt/homebrew/bin/fish"
 
 # --- 10. convergence task (platform half) ------------------------------------
 [tasks.platform]
-description = "macOS: DevboxDrop LaunchAgent"
+description = "macOS: DevboxDrop LaunchAgent, reference-repos libexec"
 run = "./scripts/bootstrap-macos"

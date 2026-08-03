@@ -5,14 +5,21 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Same path as Linux: real ~/code/references (no Documents indirection).
+mkdir -p "$HOME/code/references"
+
 # DevboxDrop LaunchAgent. Not expressible in [bootstrap.macos.launchd.agents]:
 # the agent is WatchPaths driven and mise's launchd schema has no WatchPaths or
 # ThrottleInterval. The plist and script must also be real files outside
 # ~/Documents — launchd-spawned processes can be denied TCC access to this repo,
 # and login-time agent discovery is fragile when the plist is a symlink into
 # Documents.
+#
+# Same TCC reason for sync-reference-repos: the declarative launchd agent runs
+# the libexec copy, not the symlink-each path under ~/.local/bin.
 mkdir -p "$HOME/.local/libexec" "$HOME/DevboxDrop" "$HOME/Library/LaunchAgents"
 install -m 755 home/.local/bin/devbox-drop-sync.sh "$HOME/.local/libexec/devbox-drop-sync.sh"
+install -m 755 home/.local/bin/sync-reference-repos "$HOME/.local/libexec/sync-reference-repos"
 
 agent="$HOME/Library/LaunchAgents/dev.ani.devbox-drop.plist"
 launchctl bootout "gui/$(id -u)/dev.ani.devbox-drop" 2>/dev/null || true
