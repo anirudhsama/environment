@@ -35,9 +35,17 @@ Using gpt-5.6-sol inside workflows and subagents (the `model` parameter only acc
 - Spawn a thin Claude wrapper agent — `model: 'sonnet', effort: 'low'` — whose only job is to write a self-contained Codex prompt, run it via Bash, and return the result. Put a `schema` on the wrapper to get structured output back.
 - Write the prompt to a file and feed it to Codex over stdin (`codex exec < prompt.md`), not as an inline argument. Long inline prompts break on shell quoting and get truncated; a file is reliable and lets the prompt carry all the context Codex needs in one shot.
 - Label these agents with a `gpt-5.6-sol:` prefix, e.g. `{label: 'gpt-5.6-sol:review-auth'}`. The workflow UI only shows the wrapper's Claude model, so the label is the only signal that the real worker is gpt-5.6-sol.
-- Codex runs can blow past Bash's 10-minute timeout — pass an explicit longer timeout, or run in the background and poll for the report file.
+- Codex runs can blow past Bash's 10-minute timeout — for anything that might run long, launch through herdr (below) instead of background Bash so the run survives the wrapper.
 - Parallel gpt-5.6-sol implementation agents must use `isolation: 'worktree'` so Codex's edits don't collide in the shared checkout.
 - Workflow token budgets only count Claude tokens; Codex work is free and invisible to `budget.spent()`.
+
+Running long Codex (or other CLI-agent) tasks under herdr:
+- The herdr server owns the process, so runs survive wrapper/Bash death and output stays readable. CLI-launched work only — Agent/Workflow subagents are in-process API calls; herdr can't manage those.
+- If `herdr status server` says it's down, start `herdr server` as a background Bash task.
+- The server is shared with other sessions: pick a short session tag, `herdr workspace create --label cc-<tag> --no-focus`, launch everything into that workspace, and never touch panes you didn't start.
+- Launch: `herdr agent start cc-<tag>-<task> --workspace <ws_id> --cwd <dir> --no-focus -- bash -c 'codex exec < prompt.md > report.md; echo DONE_<tag>'`; note the `pane_id`.
+- Block with `herdr wait output <pane_id> --match DONE_<tag> --timeout <ms>`; fleet = `herdr agent list` filtered on your `workspace_id`; tail via `herdr agent read`. Ignore `agent_status` for headless runs (TUI-only detection) — the sentinel + report file is the truth.
+- `herdr pane close` finished panes (leave failures open); `herdr workspace close <ws_id>` at session end.
 
 ## Sideshow Visuals
 
