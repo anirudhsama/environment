@@ -15,6 +15,9 @@ python = "3.12"
 # the shim silently winning is worse than either choice alone.
 uv = "latest"
 fnox = "latest"
+# jdx, same as fnox: keep it on mise's train (completions require it). Don't
+# also brew/pacman it — two copies with the shim winning is the worse outcome.
+usage = "latest"
 
 # CLIs with no OS package, or where the OS package split the two machines.
 hunkdiff = "latest"            # aqua:modem-dev/hunk — native binary, no node
