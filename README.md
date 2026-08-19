@@ -28,6 +28,11 @@ mv ~/.bashrc ~/.bashrc.pre-environment
 mise bootstrap
 ```
 
+Linux keeps Bash as the account login shell because VS Code and T3 Code Remote
+SSH send a Bash bootstrap script through a non-interactive SSH session. The
+tracked `.bash_profile` switches interactive terminal logins to fish, so SSH,
+Mosh, and local TTY sessions still open in fish. macOS uses fish directly.
+
 Install mise from `mise.run`, **not** brew or pacman — it's the only route that
 enables `mise self-update`, and mise ships near-daily so every distro lags it.
 

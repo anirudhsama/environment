@@ -10,8 +10,6 @@
 # git is also in bootstrap.sh's seed set; declaring it here too is intentional —
 # this table is the complete picture and pacman --needed makes it a no-op.
 #
-# fish matters for phase 8: its Arch package has a post_install scriptlet that
-# appends /usr/bin/fish to /etc/shells, which is what chsh validates against.
 [bootstrap.packages]
 
 # --- system / provisioning ---
@@ -89,6 +87,7 @@
 # platform config effectively is one — this only applies where mise loads
 # mise.linux.toml.
 [dotfiles]
+"~/.bash_profile" = { source = "home/.bash_profile", mode = "symlink" }
 "~/.bashrc" = { source = "home/.bashrc", mode = "symlink" }
 "~/.gradle/gradle.properties" = { source = "home/.gradle/gradle.properties.linux", mode = "symlink" }
 
@@ -149,11 +148,11 @@ randomized_delay_sec = "30m"
 unit = "reference-repos"
 
 # --- 8. login shell ----------------------------------------------------------
-# Runs `chsh -s` as you, not root, so the path must be in /etc/shells — the
-# fish package handles that at phase 1. Expect a password prompt on a fresh
-# machine; it's a no-op once set.
+# Remote SSH feeds a bash bootstrap script to the login shell without a PTY.
+# Bash stays the account shell so that script parses. The tracked .bash_profile
+# replaces interactive terminal logins with fish.
 [bootstrap.user]
-login_shell = "/usr/bin/fish"
+login_shell = "/usr/bin/bash"
 
 # --- 10. convergence task (platform half) ------------------------------------
 [tasks.platform]
