@@ -49,8 +49,8 @@ snapshot only after every validation passes.
 The staged root receives
 [`cloud-init-preserve-cloned-identity.cfg`](cloud-init-preserve-cloned-identity.cfg).
 Cloud-init can configure the replacement VM's new network interface without
-changing the copied hostname or SSH host keys. The copied Tailscale state makes
-the replacement reconnect as the same tailnet device.
+changing the copied hostname, SSH host keys, or generated locales. The copied
+Tailscale state makes the replacement reconnect as the same tailnet device.
 
 ## Cut over on CloudPe
 
