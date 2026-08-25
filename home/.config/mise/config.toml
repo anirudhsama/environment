@@ -24,16 +24,27 @@ hunkdiff = "latest"            # aqua:modem-dev/hunk — native binary, no node
 doppler = "latest"
 hasura-cli = "latest"
 
-# npm-only CLIs. These were bun globals (and a Homebrew cask for grok), which
-# is how the Mac and devbox drifted several major versions apart.
+# npm-only CLIs shared by every machine.
 "npm:eas-cli" = "latest"
 "npm:vercel" = "latest"
 "npm:agent-browser" = "latest"
+
+# Coding agents. Bare mise aliases follow the same backends Omarchy uses; Grok
+# is explicit because that is Omarchy's package choice and xAI's published CLI.
+claude = "latest"
+codex = "latest"
+opencode = "latest"
 "npm:@xai-official/grok" = "latest"
 
 [settings]
 experimental = true
 idiomatic_version_file_enable_tools = ["python"]
+minimum_release_age_excludes = [
+  "claude",
+  "codex",
+  "opencode",
+  "npm:@xai-official/grok",
+]
 trusted_config_paths = [
   "/Users/ani/conductor/workspaces",
   "/Users/ani/Documents/code/workspaces",

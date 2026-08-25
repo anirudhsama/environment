@@ -27,8 +27,8 @@ min_version = "2026.7.0"
 # Sourcing policy, in order of preference:
 #   1. OS package (pacman / brew) when it exists and tracks upstream
 #   2. mise [tools] when it isn't packaged, the distro lags, or it's npm-only
-#   3. a vendor self-updater, only where the vendor recommends it (claude-code,
-#      and mise itself)
+#   3. a vendor self-updater only where lifecycle semantics require it
+#      (herdr's live handoff, and mise itself)
 #
 # Cross-machine CLIs and runtimes live in home/.config/mise/config.toml so they
 # are on PATH everywhere, not just inside this repo.

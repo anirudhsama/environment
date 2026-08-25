@@ -19,14 +19,6 @@ if command -v fish >/dev/null 2>&1; then
   fish -c 'source scripts/tide-settings.fish'
 fi
 
-# --- claude-code: vendor's native installer, per Anthropic's docs ------------
-# The only agent CLI on a self-updater. It's the recommended install method and
-# the only one that auto-updates; every package-manager route (AUR, brew, apt)
-# is manual-upgrade. Install once, then let it update itself.
-if [ ! -x "$HOME/.local/bin/claude" ]; then
-  curl -fsSL https://claude.ai/install.sh | bash
-fi
-
 # --- herdr ------------------------------------------------------------------
 # Native installer rather than a package: `herdr update --handoff` upgrades the
 # server without killing running agent sessions, which package installs can't.

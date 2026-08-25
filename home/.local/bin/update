@@ -27,7 +27,7 @@ fi
 if command -v mise >/dev/null 2>&1; then
   mise self-update --yes || true
 
-  # mise-managed runtimes and CLIs (node, bun, uv, fnox, vercel, grok, ...).
+  # mise-managed runtimes and CLIs (node, bun, uv, fnox, vercel, agents, ...).
   # `= "latest"` is satisfied by any installed version, so this is what
   # actually moves them forward.
   mise upgrade
@@ -35,12 +35,6 @@ if command -v mise >/dev/null 2>&1; then
 fi
 
 # Tools that manage their own updates, so neither pacman nor mise sees them.
-
-# claude-code auto-updates in the background; this just applies it now rather
-# than on the next launch. No-ops if it's already current.
-if command -v claude >/dev/null 2>&1; then
-  claude update || true
-fi
 
 # --handoff swaps the herdr server without killing running agent sessions.
 if command -v herdr >/dev/null 2>&1; then

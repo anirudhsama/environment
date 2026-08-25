@@ -3,12 +3,66 @@
 # full phase list.
 
 # --- 1. system packages ------------------------------------------------------
-# brew:/brew-cask: entries land here in a later pass. Until then the Mac's
-# package set stays unmanaged — `mise bootstrap packages import` will generate
-# the formulae list when we're ready.
-#
-# Note for that pass: Homebrew does NOT add fish to /etc/shells the way Arch's
-# package does, so a fresh Mac needs that line present before phase 8 can chsh.
+# Curated equivalents of the Arch package set. Apple-provided tools stay with
+# macOS, and Linux-only packages are omitted. mise itself remains on the vendor
+# installer so `mise self-update` works.
+[bootstrap.packages]
+
+# --- system / provisioning ---
+"brew:git" = "latest"
+"brew:rsync" = "latest"
+
+# --- remote access ---
+# Tailscale remains the signed Mac app rather than a second Homebrew install.
+"brew:mosh" = "latest"
+
+# --- shell ---
+"brew:fish" = "latest"
+"brew:atuin" = "latest"
+"brew:zellij" = "latest"
+
+# --- editor ---
+"brew:neovim" = "latest"
+
+# --- android / jvm ---
+"brew:openjdk@17" = "latest"
+
+# --- dev tooling ---
+"brew:gh" = "latest"
+"brew-cask:sentry-cli" = "latest"
+# Coding agents use Omarchy's mise backends through the shared global config.
+
+# --- fonts used by the tracked Ghostty fallback chain ---
+"brew-cask:font-jetbrains-mono" = "latest"
+
+# --- database clients ---
+"brew:libpq" = "latest"
+"brew:pgcli" = "latest"
+
+# --- cli quality of life ---
+"brew:ripgrep" = "latest"
+"brew:fzf" = "latest"
+"brew:fd" = "latest"
+"brew:bat" = "latest"
+"brew:tree" = "latest"
+"brew:jq" = "latest"
+"brew:wget" = "latest"
+
+# --- monitoring ---
+"brew:htop" = "latest"
+"brew:btop" = "latest"
+
+# --- media ---
+"brew:ffmpeg" = "latest"
+
+# --- cloud ---
+"brew:awscli" = "latest"
+
+# --- secrets ---
+"brew:age" = "latest"
+
+# --- agent process plumbing ---
+"brew:socat" = "latest"
 
 # --- 3. dotfiles (macOS-only) ------------------------------------------------
 # [dotfiles] has no per-entry OS filter, but a [dotfiles] table inside a
@@ -33,6 +87,7 @@ stdout_path = "~/Library/Logs/reference-repos.log"
 stderr_path = "~/Library/Logs/reference-repos.log"
 
 # --- 8. login shell ----------------------------------------------------------
+# mise registers Homebrew Fish in /etc/shells before changing the account.
 [bootstrap.user]
 login_shell = "/opt/homebrew/bin/fish"
 

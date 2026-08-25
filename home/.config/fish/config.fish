@@ -1,6 +1,10 @@
-# Enable homebrew (macOS only)
+# Homebrew prefix exists before its frontend during first bootstrap, so add its
+# bin directories directly and use shellenv once brew itself is available.
 if test (uname) = Darwin
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+    fish_add_path /opt/homebrew/bin /opt/homebrew/sbin
+    if test -x /opt/homebrew/bin/brew
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    end
 end
 
 # Disable the fish greeting message
@@ -94,8 +98,6 @@ if test (uname) = Darwin
     # Added by OrbStack: command-line tools and integration
     source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
-    # opencode
-    fish_add_path /Users/ani/.opencode/bin
 end
 
 # fnox shell integration

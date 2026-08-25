@@ -41,9 +41,7 @@
 # --- dev tooling ---
 "pacman:github-cli" = "latest"
 "pacman:sentry-cli" = "latest"
-# Both agent CLIs are in extra at upstream parity — no AUR needed.
-"pacman:openai-codex" = "latest"
-"pacman:opencode" = "latest"
+# Coding agents use Omarchy's mise backends through the shared global config.
 
 # --- database clients (client only; postgresql-libs owns /usr/bin/psql) ---
 "pacman:postgresql-libs" = "latest"

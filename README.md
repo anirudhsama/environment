@@ -44,8 +44,11 @@ enables `mise self-update`, and mise ships near-daily so every distro lags it.
 1. **OS package** (`[bootstrap.packages]`) when it exists and tracks upstream —
    on Arch that's nearly everything, and it brings completions and manpages.
 2. **mise `[tools]`** when it isn't packaged, the distro lags, or it's npm-only.
-3. **A vendor self-updater**, only where the vendor recommends it: claude-code,
-   herdr, and mise itself.
+3. **A vendor self-updater** only where lifecycle semantics require it: herdr's
+   live handoff, and mise itself.
+
+Claude, Codex, OpenCode, and Grok use the same mise backends selected by
+Omarchy, declared normally in the tracked global mise config.
 
 `update` on the devbox refreshes all three.
 
@@ -80,5 +83,5 @@ enables `mise self-update`, and mise ships near-daily so every distro lags it.
   `[bootstrap.repos]` — mise can't do `--depth 1`.
 - Fish plugins are fisher-managed and untracked; `fish_plugins` is the lockfile.
   Neovim restores from `lazy-lock.json` on first launch.
-- Homebrew packages aren't declared yet — the Mac's package set is still
-  unmanaged. `mise bootstrap packages import` will seed the formulae list.
+- macOS Homebrew packages are a curated counterpart to the Arch package set;
+  Apple-provided and Linux-only tools are intentionally omitted.
