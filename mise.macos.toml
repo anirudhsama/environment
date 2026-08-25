@@ -89,8 +89,8 @@ stderr_path = "~/Library/Logs/reference-repos.log"
 # Match Devbox: expose T3 directly on the private Tailnet rather than adding a
 # second Tailscale Serve/HTTPS proxy layer.
 [bootstrap.macos.launchd.agents.t3-code]
-program = "~/.local/share/mise/shims/bunx"
-args = ["t3@nightly", "serve", "--host", "0.0.0.0", "--port", "3773", "--base-dir", "/Users/ani/.t3"]
+program = "~/.local/bin/mise"
+args = ["exec", "--", "npx", "--yes", "t3@nightly", "serve", "--host", "0.0.0.0", "--port", "3773", "--base-dir", "/Users/ani/.t3"]
 run_at_load = true
 keep_alive = true
 throttle_interval = 5
