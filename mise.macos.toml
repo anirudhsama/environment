@@ -90,7 +90,7 @@ stderr_path = "~/Library/Logs/reference-repos.log"
 # second Tailscale Serve/HTTPS proxy layer.
 [bootstrap.macos.launchd.agents.t3-code]
 program = "~/.local/share/mise/shims/bunx"
-args = ["--bun", "t3@nightly", "serve", "--host", "0.0.0.0", "--port", "3773", "--base-dir", "/Users/ani/.t3"]
+args = ["t3@nightly", "serve", "--host", "0.0.0.0", "--port", "3773", "--base-dir", "/Users/ani/.t3"]
 run_at_load = true
 keep_alive = true
 throttle_interval = 5
