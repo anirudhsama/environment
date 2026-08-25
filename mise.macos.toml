@@ -86,6 +86,19 @@ environment = { PATH = "/opt/homebrew/bin:/usr/bin:/bin" }
 stdout_path = "~/Library/Logs/reference-repos.log"
 stderr_path = "~/Library/Logs/reference-repos.log"
 
+# Match Devbox: expose T3 directly on the private Tailnet rather than adding a
+# second Tailscale Serve/HTTPS proxy layer.
+[bootstrap.macos.launchd.agents.t3-code]
+program = "~/.local/share/mise/shims/bunx"
+args = ["--bun", "t3@nightly", "serve", "--host", "0.0.0.0", "--port", "3773", "--base-dir", "/Users/ani/.t3"]
+run_at_load = true
+keep_alive = true
+throttle_interval = 5
+environment = { HOME = "/Users/ani", PATH = "/Users/ani/.bun/bin:/Users/ani/.local/bin:/Users/ani/.local/share/mise/shims:/usr/bin:/bin:/usr/sbin:/sbin" }
+working_directory = "~"
+stdout_path = "~/Library/Logs/t3-code.log"
+stderr_path = "~/Library/Logs/t3-code.log"
+
 # --- 8. login shell ----------------------------------------------------------
 # mise registers Homebrew Fish in /etc/shells before changing the account.
 [bootstrap.user]
