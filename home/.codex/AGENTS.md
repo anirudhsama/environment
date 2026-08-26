@@ -11,15 +11,15 @@
 
 ## Machines
 
-The computers use the `emperor-jazz.ts.net` Tailscale tailnet:
+These computers use the `emperor-jazz.ts.net` Tailscale tailnet:
 
-| Machine | Tailnet DNS | Access from the primary Mac |
-|---|---|---|
-| Primary M5 MacBook Pro | `anirudhs-mbp-14.emperor-jazz.ts.net` | Local machine |
-| Arch Linux devbox | `devbox.emperor-jazz.ts.net` | `ssh devbox` |
-| Development MacBook Pro | `dev-mbp-14.emperor-jazz.ts.net` | `ssh dev-mbp-14` |
+| Names I use | Tailnet DNS | Access from primary Mac | Environment checkout |
+|---|---|---|---|
+| main Mac, primary Mac, M5 MacBook Pro | `anirudhs-mbp-14.emperor-jazz.ts.net` | Local machine | `~/Documents/code/environment` |
+| devbox, Linux box | `devbox.emperor-jazz.ts.net` | `ssh devbox` | `~/dev/environment` |
+| Dev Mac, development Mac, old MacBook Pro | `dev-mbp-14.emperor-jazz.ts.net` | `ssh dev-mbp-14` | `~/Documents/code/environment` |
 
-Use the short hostnames for SSH. When I name `devbox` or `dev-mbp-14`, connect directly instead of rediscovering the host or address.
+When I assign work to a named machine, run it on that machine in the checkout above. From the primary Mac, use the short SSH target directly. If the session is already running on the target machine, work locally.
 
 ## Sideshow Visuals
 
