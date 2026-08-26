@@ -21,6 +21,7 @@
   "extraKnownMarketplaces": {},
   "effortLevel": "high",
   "tui": "fullscreen",
+  "theme": "dark",
   "autoMemoryEnabled": false,
   "skipDangerousModePermissionPrompt": true
 }
