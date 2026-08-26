@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# One-off migration: Btrfs root to XFS on LVM-VDO with LZ4 compression.
+# Convert a fresh machine's root to XFS on LVM-VDO with LZ4 compression and
+# deduplication, matching the devbox layout. Not a migration: it copies the
+# running root to a blank second volume and stages GRUB, then you cut over.
 #
 # Layout on the 200 GiB target disk:
 #   [1 MiB BIOS boot][LVM PV]
@@ -9,18 +11,13 @@
 #     about 18 GiB remains free in the VG for emergency VDO extension
 #
 # The initial VDO logical size is not overprovisioned. LVM chooses the largest
-# logical size that can hold incompressible data. Extend it after measuring the
-# real compression ratio on this workload.
-#
-# The script copies a read-only Btrfs snapshot and stages GRUB, but never
-# reboots. Cutover remains manual.
+# logical size that can hold incompressible data.
 #
 # Run as root:
-#   sudo TARGET_DISK=/dev/vdb bash bootstrap/migrations/btrfs-to-lvm-vdo-xfs/migrate.sh
-#   sudo TARGET_DISK=/dev/vdb PREFLIGHT_ONLY=1 bash bootstrap/migrations/btrfs-to-lvm-vdo-xfs/migrate.sh
+#   sudo TARGET_DISK=/dev/vdb bash scripts/to-vdo.sh
+#   sudo TARGET_DISK=/dev/vdb PREFLIGHT_ONLY=1 bash scripts/to-vdo.sh
 set -euo pipefail
 
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 TARGET_DISK=${TARGET_DISK:-}
 PREFLIGHT_ONLY=${PREFLIGHT_ONLY:-0}
 YES=${YES:-0}
@@ -32,8 +29,7 @@ BOOT_SIZE=2G
 SWAP_SIZE=5G
 VDO_PHYSICAL_SIZE=175G
 MIN_TARGET_BYTES=$((200 * 1024 * 1024 * 1024))
-MOUNT_DIR=/mnt/devbox-migration
-SOURCE_SNAPSHOT=/.devbox-migration-source
+MOUNT_DIR=/mnt/devbox-vdo
 
 fail() {
   echo "error: $*" >&2
@@ -49,10 +45,8 @@ ROOT_SOURCE=$(readlink -f "$(findmnt -n -o SOURCE /)")
 ROOT_PARENT=$(lsblk -ndo PKNAME "$ROOT_SOURCE")
 [ -n "$ROOT_PARENT" ] || fail "cannot resolve the physical disk containing $ROOT_SOURCE"
 ROOT_DISK=/dev/$ROOT_PARENT
-ROOT_FSTYPE=$(findmnt -n -o FSTYPE /)
 
 [ "$TARGET_DISK" != "$ROOT_DISK" ] || fail "$TARGET_DISK contains the running root filesystem"
-[ "$ROOT_FSTYPE" = btrfs ] || fail "expected the source root to be Btrfs, found $ROOT_FSTYPE"
 [ ! -d /sys/firmware/efi ] || fail "this script only supports the devbox's BIOS boot mode"
 
 TARGET_BYTES=$(blockdev --getsize64 "$TARGET_DISK")
@@ -71,21 +65,13 @@ fi
 if vgs "$VG" >/dev/null 2>&1; then
   fail "volume group $VG already exists"
 fi
-SNAPSHOT_EXISTS=0
-if [ -e "$SOURCE_SNAPSHOT" ]; then
-  btrfs subvolume show "$SOURCE_SNAPSHOT" >/dev/null 2>&1 \
-    || fail "$SOURCE_SNAPSHOT exists but is not a Btrfs subvolume"
-  btrfs property get "$SOURCE_SNAPSHOT" ro | grep -qx 'ro=true' \
-    || fail "$SOURCE_SNAPSHOT exists but is not read-only"
-  SNAPSHOT_EXISTS=1
-fi
 if mountpoint -q "$MOUNT_DIR"; then
   fail "$MOUNT_DIR is already a mountpoint"
 fi
 
-echo ">> checking migration tools"
+echo ">> checking conversion tools"
 REQUIRED_COMMANDS=(
-  arch-chroot blkid blockdev btrfs dmsetup findmnt grub-install
+  arch-chroot blkid blockdev dmsetup findmnt grub-install
   grub-mkconfig install lsblk lsinitcpio lvcreate lvs mkfs.ext4 mkfs.xfs mkinitcpio
   mkswap modprobe mount mountpoint partprobe pvcreate rsync sfdisk
   sync udevadm umount vgchange vgcreate vgs wipefs xfs_info
@@ -98,7 +84,7 @@ modprobe dm-vdo
 dmsetup targets | awk '$1 == "vdo" { found = 1 } END { exit !found }' \
   || fail "the kernel did not register the VDO device-mapper target"
 
-echo ">> source: $ROOT_SOURCE on $ROOT_DISK ($ROOT_FSTYPE)"
+echo ">> source: $ROOT_SOURCE on $ROOT_DISK"
 echo ">> target: $TARGET_DISK ($(lsblk -ndro SIZE "$TARGET_DISK"))"
 echo ">> layout: 2 GiB boot, 5 GiB swap, 175 GiB physical VDO, about 18 GiB VG reserve"
 echo ">> VDO compression and deduplication will be enabled explicitly"
@@ -161,33 +147,23 @@ lvcreate -y --type vdo -n "$ROOT_LV" -L "$VDO_PHYSICAL_SIZE" \
   --compression y --deduplication y "$VG"
 mkfs.xfs -K -L root "/dev/mapper/$VG-$ROOT_LV"
 
-echo ">> taking a stable read-only Btrfs snapshot"
-if [ "$SNAPSHOT_EXISTS" = 1 ]; then
-  echo ">> using existing snapshot: $SOURCE_SNAPSHOT"
-else
-  sync
-  btrfs subvolume snapshot -r / "$SOURCE_SNAPSHOT"
-fi
-
 mkdir -p "$MOUNT_DIR"
 mount "/dev/mapper/$VG-$ROOT_LV" "$MOUNT_DIR"
 mkdir -p "$MOUNT_DIR/boot"
 mount "/dev/mapper/$VG-$BOOT_LV" "$MOUNT_DIR/boot"
 
-echo ">> copying the snapshot"
+echo ">> copying the running root"
 rsync -aHAXS --numeric-ids --info=progress2 \
   --exclude='/dev/***' --exclude='/proc/***' --exclude='/sys/***' \
   --exclude='/run/***' --exclude='/tmp/***' --exclude='/mnt/***' \
-  --exclude='/efi/***' --exclude='/swap/***' \
-  --exclude='/.devbox-migration-source/***' --exclude='/lost+found/***' \
-  "$SOURCE_SNAPSHOT/" "$MOUNT_DIR/"
+  --exclude='/efi/***' --exclude='/lost+found/***' \
+  / "$MOUNT_DIR/"
 
-rm -rf "$MOUNT_DIR/swap"
-mkdir -m 700 "$MOUNT_DIR/swap"
-mkdir -p "$MOUNT_DIR"/{dev,proc,sys,run,tmp,efi}
-chmod 1777 "$MOUNT_DIR/tmp"
-install -Dm644 "$SCRIPT_DIR/cloud-init-preserve-cloned-identity.cfg" \
-  "$MOUNT_DIR/etc/cloud/cloud.cfg.d/99-preserve-cloned-identity.cfg"
+install -Dm644 /dev/stdin "$MOUNT_DIR/etc/cloud/cloud.cfg.d/99-preserve-cloned-identity.cfg" <<'EOF'
+#cloud-config
+preserve_hostname: true
+ssh_deletekeys: false
+EOF
 
 NEW_UUID=$(blkid -s UUID -o value "/dev/mapper/$VG-$ROOT_LV")
 [ -n "$NEW_UUID" ] || fail "could not read the new XFS UUID"
@@ -200,9 +176,6 @@ UUID=$BOOT_UUID /boot ext4 defaults 0 2
 EOF
 
 echo ">> preparing the new root for boot"
-sed -i -E 's/rootflags=compress=[^ "[:space:]]+[[:space:]]*//g' \
-  "$MOUNT_DIR/etc/default/grub"
-
 if ! grep -Eq '^HOOKS=.*[[:space:](]lvm2[[:space:])]' "$MOUNT_DIR/etc/mkinitcpio.conf"; then
   sed -i -E 's/(^HOOKS=.*[[:space:]])block([[:space:]])/\1block lvm2\2/' \
     "$MOUNT_DIR/etc/mkinitcpio.conf"
@@ -242,12 +215,11 @@ xfs_info "$MOUNT_DIR"
 lvs -a -o lv_name,lv_size,data_percent,vdo_compression,vdo_deduplication,vdo_saving_percent "$VG"
 
 cleanup_resources
-btrfs subvolume delete "$SOURCE_SNAPSHOT" >/dev/null
 trap - EXIT INT TERM
 
 cat <<EOF
 
->> Migration staged. Nothing has booted from $TARGET_DISK yet.
+>> Conversion staged. Nothing has booted from $TARGET_DISK yet.
 >>
 >> CloudPe cutover:
 >>   1. power off this VM and keep it stopped

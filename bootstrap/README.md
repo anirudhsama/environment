@@ -63,15 +63,11 @@ key-only SSH on 22 — which is what protected the box during bootstrap.sh anywa
 `tailscale up` stays manual: it blocks on a browser auth URL, so it can't live
 in an idempotent task. `taildrop-inbox.service` retries every 10s until it's up.
 
-## Existing-machine storage migrations
-
-The fresh-build flow above creates new machine, SSH, and Tailscale identities.
-Do not use a state-preserving disk migration for an ordinary rebuild.
-
-To preserve an existing Btrfs machine while moving it to XFS on LVM-VDO, use
-the [Btrfs to LVM-VDO/XFS migration](migrations/btrfs-to-lvm-vdo-xfs/README.md).
-It copies the running machine to a blank second volume and boots a replacement
-VM from that volume. The old VM stays powered off as the rollback path.
+The devbox root is XFS on an LVM-VDO logical volume (LZ4 compression, dedup).
+The fresh-build flow above uses the image default. To convert a new machine to
+that layout, attach a blank ≥200 GiB volume and run
+`sudo TARGET_DISK=/dev/vdb bash scripts/to-vdo.sh` — it stages the copy, GRUB,
+and VDO initramfs, then you cut over (power off, deploy from the new volume).
 
 ## One-time fixes already baked into bootstrap.sh
 
