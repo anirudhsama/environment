@@ -1,7 +1,10 @@
 #!/usr/bin/env fish
 
-set -l service dev.mise.t3-code.service
 set -l port 3773
+set -l platform (uname -s)
+set -l service
+set -l service_target
+set -l failure_hint
 
 function usage
     echo "usage: t3code upgrade" >&2
@@ -14,16 +17,36 @@ if test (count $argv) -ne 1; or test "$argv[1]" != upgrade
 end
 
 echo "Upgrading T3 Code to the latest nightly..."
-systemctl --user restart $service; or exit $status
+
+switch $platform
+    case Linux
+        set service dev.mise.t3-code.service
+        set failure_hint "journalctl --user -u $service -n 100"
+        systemctl --user restart $service; or exit $status
+    case Darwin
+        set service dev.mise.t3-code
+        set service_target (string join '' 'gui/' (id -u) '/' $service)
+        set failure_hint "tail -n 100 ~/Library/Logs/t3-code.log"
+        launchctl kickstart -k $service_target; or exit $status
+    case '*'
+        echo "Unsupported platform: $platform" >&2
+        exit 1
+end
 
 for attempt in (seq 1 120)
     if curl -fsS --max-time 2 "http://127.0.0.1:$port/" >/dev/null 2>&1
-        set -l service_pid (systemctl --user show $service -p MainPID --value)
+        switch $platform
+            case Linux
+                set service_pid (systemctl --user show $service -p MainPID --value)
+            case Darwin
+                set service_pid (launchctl print $service_target | string match -r -g '^\s*pid = ([0-9]+)$')
+        end
+
         set -l t3_pid (pgrep -P $service_pid -f 'node .*/node_modules/.bin/t3 serve' | head -n1)
         set -l t3_version unknown
 
         if test -n "$t3_pid"
-            set -l entrypoint (string split0 </proc/$t3_pid/cmdline | string match -r '.*/node_modules/\.bin/t3$' | head -n1)
+            set -l entrypoint (ps -p $t3_pid -o command= | string match -r '[^[:space:]]*/node_modules/\.bin/t3' | head -n1)
             if test -n "$entrypoint"
                 set -l package_json (string replace -r '/node_modules/\.bin/t3$' '/node_modules/t3/package.json' -- $entrypoint)
                 if test -f "$package_json"
@@ -32,14 +55,19 @@ for attempt in (seq 1 120)
             end
         end
 
-        set -l memory_bytes (systemctl --user show $service -p MemoryCurrent --value)
-        set -l memory_mib (math --scale=0 "$memory_bytes / 1024 / 1024")
-        echo "T3 Code $t3_version is ready on port $port ($memory_mib MiB)."
+        set -l ready "T3 Code $t3_version is ready on port $port"
+        if test "$platform" = Linux
+            set -l memory_bytes (systemctl --user show $service -p MemoryCurrent --value)
+            set -l memory_mib (math --scale=0 "$memory_bytes / 1024 / 1024")
+            set ready "$ready ($memory_mib MiB)"
+        end
+
+        echo "$ready."
         exit 0
     end
 
-    if systemctl --user is-failed --quiet $service
-        echo "T3 Code failed to start. Check: journalctl --user -u $service -n 100" >&2
+    if test "$platform" = Linux; and systemctl --user is-failed --quiet $service
+        echo "T3 Code failed to start. Check: $failure_hint" >&2
         exit 1
     end
 
@@ -47,5 +75,5 @@ for attempt in (seq 1 120)
 end
 
 echo "T3 Code did not become ready within 120 seconds." >&2
-echo "Check: journalctl --user -u $service -n 100" >&2
+echo "Check: $failure_hint" >&2
 exit 1

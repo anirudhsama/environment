@@ -9,6 +9,18 @@
 - Be terse. Lead with the answer, cut the preamble, and keep comments to the ones that earn their place.
 - Bias toward prose unless we are actively implementing, debugging, reviewing, or prototyping code, or I explicitly ask for snippets. In brainstorming, design discussion, planning, tradeoff analysis, product thinking, and architecture conversations, do not pad the response with code examples.
 
+## Machines
+
+The computers use the `emperor-jazz.ts.net` Tailscale tailnet:
+
+| Machine | Tailnet DNS | Access from the primary Mac |
+|---|---|---|
+| Primary M5 MacBook Pro | `anirudhs-mbp-14.emperor-jazz.ts.net` | Local machine |
+| Arch Linux devbox | `devbox.emperor-jazz.ts.net` | `ssh devbox` |
+| Development MacBook Pro | `dev-mbp-14.emperor-jazz.ts.net` | `ssh dev-mbp-14` |
+
+Use the short hostnames for SSH. When I name `devbox` or `dev-mbp-14`, connect directly instead of rediscovering the host or address.
+
 ## Sideshow Visuals
 
 Use Sideshow by default for visual deliverables: UI mockups, HTML pages, dashboards, charts, diagrams, rendered explanations, presentations, and screenshots.
