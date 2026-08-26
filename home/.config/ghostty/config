@@ -42,7 +42,7 @@ unfocused-split-opacity = 0.90
 unfocused-split-fill = black
 window-inherit-working-directory = false
 working-directory = home
-auto-update-channel = stable
+auto-update-channel = tip
 
 keybind = cmd+r=reload_config
 keybind = global:cmd+\=toggle_quick_terminal
