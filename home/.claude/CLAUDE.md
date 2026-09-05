@@ -18,22 +18,21 @@ Rankings are higher = better on each axis. Cost is what I actually pay through m
 
 | model       | cost | intelligence | taste |
 |-------------|------|--------------|-------|
-| gpt-5.6-sol | 6    | 8            | 5     |
+| gpt-5.6-sol | 6    | 7            | 5     |
 | sonnet-5    | 5    | 5            | 7     |
-| opus-4.8    | 4    | 7            | 8     |
-| gpt-6-astra | 4    | 9            | 8     |
+| gpt-6-astra | 4    | 8            | 8     |
 | fable-5.1   | 2    | 9            | 9     |
 
 How to apply:
 - These are defaults, not limits; you have standing permission to override them. If a cheaper model's output misses the bar, redo the work with a stronger one without asking. Judge the output, not the price tag; escalating costs less than shipping something mediocre.
 - Cost is only a tie-breaker. When the axes conflict on anything that ships, intelligence > taste > cost.
-- Bulk / mechanical work (clear-spec implementation, data analysis, migrations): gpt-5.6-sol. Strong intelligence, and its generous limits make it the one to lean on for volume.
-- Hard problems that need Fable-class intelligence but not Fable-class taste (gnarly debugging, algorithmic work, large refactors against a clear spec): gpt-6-astra. It is Mythos-class and costs me less than fable-5.1.
+- Bulk / mechanical work (clear-spec implementation, data analysis, migrations): gpt-6-astra at `medium`. It outscores gpt-5.6-sol at medium by a wide margin while using fewer tokens. gpt-5.6-sol keeps only disposable volume (scratch scripts, data munging, one-off analysis); if it touches anything that ships, run it at `xhigh`, since its `medium` is the weakest useful configuration.
+- Hard problems that need real intelligence but not Fable-class taste (gnarly debugging, algorithmic work, large refactors against a clear spec): gpt-6-astra at `high`, `xhigh` when it's gnarly. Never `max`: it buys under a point for 2.6x the tokens.
 - Anything user-facing (UI, copy, API design) needs taste ≥ 7.
-- Reviews of plans or implementations go to fable-5.1 or gpt-6-astra, never Opus or Sonnet. Use both when the change matters: two Mythos-class reviewers from different labs catch different things.
-- Effort is the second lever after model. Fable 5.1 at `medium` roughly matches Fable 5, and at `low` it is often competitive with Opus and Sonnet on cost per task while scoring higher, so a `fable` agent at `effort: 'low'` or `'medium'` is a real option wherever you would otherwise run a smaller model harder. Keep `high` or above for reviews and anything intelligence-sensitive.
-- Never use Haiku.
-- Mechanics: Codex models (gpt-5.6-sol, gpt-6-astra) are only reachable through the Codex CLI. `~/.codex/config.toml` defaults to gpt-5.6-sol at medium reasoning; pass `-m gpt-6-astra` (`-c model="gpt-6-astra"` for `codex review`) and `-c model_reasoning_effort=high` when the task warrants it. For read-only investigation or data analysis, run `codex exec -s read-only` with a self-contained prompt. Claude models run via the Agent/Workflow `model` parameter: `'sonnet'`, `'opus'`, `'fable'`.
+- Reviews of plans or implementations: fable-5.1 at `high` is the primary reviewer, gpt-6-astra at `xhigh` the independent second opinion from a different lab. Use both when the change matters.
+- Effort is the second lever after model. Fable 5.1 at `medium` roughly matches Fable 5, and at `low` it is often competitive with Opus and Sonnet on cost per task while scoring higher, so a `fable` agent at `effort: 'low'` or `'medium'` is a real option wherever you would otherwise run a smaller model harder. Keep `high` for reviews and anything intelligence-sensitive; `xhigh` and `max` are for measured gains only.
+- Never use Haiku or Opus.
+- Mechanics: Codex models (gpt-5.6-sol, gpt-6-astra) are only reachable through the Codex CLI. `~/.codex/config.toml` defaults to gpt-5.6-sol at medium reasoning, so pass `-m gpt-6-astra` (`-c model="gpt-6-astra"` for `codex review`) on every call unless Sol was chosen on purpose, and `-c model_reasoning_effort=<level>` whenever the level above isn't medium. For read-only investigation or data analysis, run `codex exec -s read-only` with a self-contained prompt. Claude models run via the Agent/Workflow `model` parameter: `'sonnet'` or `'fable'`.
 
 Using Codex models inside workflows and subagents (the `model` parameter only accepts Claude models, so wrap it):
 - Spawn a thin Claude wrapper agent, `model: 'sonnet', effort: 'low'`, whose only job is to write a self-contained Codex prompt, run it via Bash, and return the result. Put a `schema` on the wrapper to get structured output back.
