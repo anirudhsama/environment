@@ -9,7 +9,7 @@
 
 [tools]
 node = "24"
-bun = "1.3"
+bun = "1.4"
 python = "3.12"
 # uv is mise-managed, deliberately NOT a pacman/brew package — two copies with
 # the shim silently winning is worse than either choice alone.
