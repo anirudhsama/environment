@@ -8,7 +8,7 @@ command -v bunx >/dev/null 2>&1 || {
 
 servers=(
   "sideshow|https://sideshow.sh/mcp"
-  "context7|https://mcp.context7.com/mcp"
+  "context7|https://mcp.context7.com/mcp/oauth"
   "deepwiki|https://mcp.deepwiki.com/mcp"
   "gh_grep|https://mcp.grep.app"
   "exa|https://mcp.exa.ai/mcp"
