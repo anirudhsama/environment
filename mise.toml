@@ -12,7 +12,7 @@ min_version = "2026.7.0"
 #                                        bootstrap.repos does not support; see
 #                                        home/.local/bin/sync-reference-repos)
 #   3  [dotfiles]                        symlink ~ from home/
-#   4  [bootstrap.mise_shell_activate]   unused (Linux bashrc is a dotfile)
+#   4  [bootstrap.mise_shell_activate]   unused (bashrc is a dotfile)
 #   5  [bootstrap.macos.defaults]        macOS defaults       (unused)
 #   6  [bootstrap.macos.launchd.agents]  LaunchAgents         (per-platform file)
 #   7  [bootstrap.linux.systemd.units]   systemd user units   (per-platform file)
@@ -42,6 +42,8 @@ min_version = "2026.7.0"
 # skills whose SKILL.md is itself a symlink. A dir link keeps leaf skill files
 # real while leaving ~/.agents a real directory for untracked runtime state.
 [dotfiles]
+"~/.bash_profile" = { source = "home/.bash_profile", mode = "symlink" }
+"~/.bashrc" = { source = "home/.bashrc", mode = "symlink" }
 "~/.gitattributes" = { source = "home/.gitattributes", mode = "symlink" }
 "~/.gitconfig" = { source = "home/.gitconfig", mode = "symlink" }
 "~/.agents/skills" = { source = "home/.agents/skills", mode = "symlink" }

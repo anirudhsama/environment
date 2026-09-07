@@ -20,13 +20,23 @@ git clone https://github.com/<you>/environment ~/dev/environment
 cd ~/dev/environment && mise trust . && mise bootstrap
 ```
 
-If `~/.bashrc` already exists, move it aside before the first bootstrap so
-mise can link the tracked Linux version:
+On either platform, move existing Bash startup files aside before the first
+bootstrap so mise can link the tracked versions:
 
 ```sh
-mv ~/.bashrc ~/.bashrc.pre-environment
+for file in ~/.bashrc ~/.bash_profile; do
+  if [ -f "$file" ] && [ ! -L "$file" ]; then
+    mv "$file" "$file.pre-environment"
+  fi
+done
 mise bootstrap
 ```
+
+Keep machine-specific Bash additions in `~/.bashrc.local`. Both platforms load
+mise shims for `bash -lc`; interactive Bash uses full mise activation. Fish
+also uses shims for noninteractive commands, including macOS SSH sessions.
+Child processes inherit PATH. An independently launched `bash -c` with a bare
+environment reads neither Bash file; use `bash -lc` or `mise exec --` there.
 
 Linux keeps Bash as the account login shell because VS Code and T3 Code Remote
 SSH send a Bash bootstrap script through a non-interactive SSH session. The
