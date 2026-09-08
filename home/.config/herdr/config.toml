@@ -1,3 +1,8 @@
 onboarding = false
+
+[terminal]
+# Bash panes need a login shell so ~/.bash_profile loads ~/.bashrc and mise.
+shell_mode = "login"
+
 [keys]
 prefix = "ctrl+a"
