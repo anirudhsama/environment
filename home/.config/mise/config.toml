@@ -34,7 +34,9 @@ hasura-cli = "latest"
 claude = "latest"
 codex = "latest"
 opencode = "latest"
-"npm:@xai-official/grok" = "latest"
+# xAI's npm package keeps the native binary under ~/.grok/bin. Re-run its
+# postinstall from the mise install so that symlink follows the mise version.
+"npm:@xai-official/grok" = { version = "latest", postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@xai-official/grok/bin/postinstall.js"' }
 
 [settings]
 experimental = true
