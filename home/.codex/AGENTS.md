@@ -9,7 +9,7 @@
 - Be terse. Lead with the answer, cut the preamble, and keep comments to the ones that earn their place.
 - Bias toward prose unless we are actively implementing, debugging, reviewing, or prototyping code, or I explicitly ask for snippets. In brainstorming, design discussion, planning, tradeoff analysis, product thinking, and architecture conversations, do not pad the response with code examples.
 - Scope is the request. A pre-existing bug, a perf concern, or behaviour the task never mentioned goes in the summary as a follow-up, unless the requested behaviour cannot work without it. Commit tests only where the task asks for them or the repo already keeps tests for that kind of change, sized like the neighbouring test files. Scratch checks stay scratch.
-- Web research goes through the Exa MCP: its search tool for queries and its fetch tool to read a page, ahead of any built-in web search or fetch. Reach for it whenever the answer depends on current docs, release notes, package versions, or anything newer than your training data, rather than answering from memory.
+- Web search and URL fetches go through the Exa MCP (`web_search_exa`, `web_fetch_exa`). Anything newer than your training data gets searched, not recalled.
 
 ## Machines
 

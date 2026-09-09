@@ -5,6 +5,7 @@ service_tier = "default"
 approval_policy = "never"
 approvals_reviewer = "user"
 sandbox_mode = "danger-full-access"
+web_search = "disabled"
 
 [features]
 hooks = true

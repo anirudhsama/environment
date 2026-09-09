@@ -21,7 +21,14 @@
   "extraKnownMarketplaces": {},
   "effortLevel": "high",
   "tui": "fullscreen",
-  "theme": "dark",
   "autoMemoryEnabled": false,
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark",
+  "agentPushNotifEnabled": true,
+  "permissions": {
+    "deny": [
+      "WebSearch",
+      "WebFetch"
+    ]
+  }
 }
