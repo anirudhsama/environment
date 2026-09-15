@@ -18,6 +18,14 @@ sudo systemctl enable --now tailscaled
 mkdir -p "$HOME/inbox" "$HOME/code/references"
 sudo loginctl enable-linger "$USER"
 
+# T3 Code owns its service lifecycle so updates can trial a new runtime and
+# roll back a failed handoff. Its systemd drop-in binds it to Devbox's stable
+# Tailscale address, reachable through MagicDNS as http://devbox:3773.
+if [[ ! -x "$HOME/.local/bin/t3" ]]; then
+  curl -fsSL https://t3.codes/install.sh | T3CODE_CHANNEL=nightly sh
+fi
+"$HOME/.local/bin/t3" service install --base-dir "$HOME/.t3"
+
 # 28 days of history: atop for process-level, sysstat/sar for CPU + memory.
 sudo sed -i -E 's/^HISTORY=.*/HISTORY=28/' /etc/conf.d/sysstat
 sudo systemctl enable --now atop.service sysstat.service

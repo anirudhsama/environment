@@ -86,6 +86,7 @@
 # mise.linux.toml.
 [dotfiles]
 "~/.gradle/gradle.properties" = { source = "home/.gradle/gradle.properties.linux", mode = "symlink" }
+"~/.config/systemd/user/t3code.service.d/network.conf" = { source = "home/.config/systemd/user/t3code.service.d/network.conf", mode = "symlink" }
 
 # --- 7. systemd user units ---------------------------------------------------
 # mise writes and enables these directly, namespaced as dev.mise.<name>.service.
@@ -99,15 +100,6 @@ description = "OpenCode remote server"
 after = ["network-online.target"]
 type = "simple"
 exec_start = "%h/.local/bin/mise exec -- opencode serve --hostname 0.0.0.0 --port 4096"
-restart = "always"
-restart_sec = "5"
-wanted_by = ["default.target"]
-
-[bootstrap.linux.systemd.units.t3-code]
-description = "T3 Code remote environment server"
-after = ["network-online.target"]
-type = "simple"
-exec_start = "%h/.local/bin/mise exec -- npx --yes t3@nightly serve --host 0.0.0.0 --port 3773 --base-dir %h/.t3"
 restart = "always"
 restart_sec = "5"
 wanted_by = ["default.target"]
