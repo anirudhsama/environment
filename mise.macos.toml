@@ -29,7 +29,7 @@
 
 # --- dev tooling ---
 "brew:gh" = "latest"
-"brew-cask:sentry-cli" = "latest"
+"brew:getsentry/tools/sentry-cli" = "latest"
 # Coding agents use Omarchy's mise backends through the shared global config.
 
 # --- fonts used by the tracked Ghostty fallback chain ---
