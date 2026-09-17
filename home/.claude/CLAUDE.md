@@ -20,23 +20,24 @@ Rankings are higher = better on each axis. Cost is what I actually pay through m
 | model       | cost | intelligence | taste |
 |-------------|------|--------------|-------|
 | gpt-5.6-sol | 6    | 7            | 5     |
-| sonnet-5    | 5    | 5            | 7     |
+| sonnet-5    | 5    | 5            | 5     |
 | gpt-6-astra | 4    | 8            | 8     |
+| opus-5      | 3    | 7            | 7     |
 | fable-5.1   | 2    | 9            | 9     |
 
 How to apply:
 - These are defaults, not limits; you have standing permission to override them. If a cheaper model's output misses the bar, redo the work with a stronger one without asking. Judge the output, not the price tag; escalating costs less than shipping something mediocre.
 - Cost is only a tie-breaker. When the axes conflict on anything that ships, intelligence > taste > cost.
-- Most day-to-day work (implementation, data analysis, migrations, debugging, refactors) goes to gpt-6-astra or gpt-5.6-sol. Prefer gpt-6-astra at `medium`; either model at `high` when the task warrants it. Your call between the two.
-- Anything user-facing (UI, copy, API design) needs taste ≥ 7.
+- The workhorse is gpt-5.6-sol at `medium`: implementation, data analysis, migrations, debugging, refactors. Bump it to `high` when the task warrants it. Reserve gpt-6-astra for reviews and for the taste-gated work below; don't pick it just because the task looks hard.
+- Anything user-facing (UI, copy, API design) needs taste ≥ 7, which rules out Sol and Sonnet. Small UI work goes to opus-5; larger or intelligence-sensitive UI work to gpt-6-astra or fable-5.1.
 - Reviews of plans or implementations: fable-5.1 at `high`, with gpt-6-astra at `high` as the second opinion. Use both when the change matters.
 - Effort is the second lever after model. A `fable` agent at `effort: 'low'` or `'medium'` is a real option for routine work. Keep `high` for reviews and anything intelligence-sensitive; `xhigh` and `max` only where the gain is measured.
-- Never use Haiku or Opus.
-- Mechanics: Codex models (gpt-5.6-sol, gpt-6-astra) are only reachable through the Codex CLI. `~/.codex/config.toml` defaults to gpt-5.6-sol at medium reasoning, so pass `-m gpt-6-astra` (`-c model="gpt-6-astra"` for `codex review`) on every call unless Sol was chosen on purpose, and `-c model_reasoning_effort=<level>` whenever the level above isn't medium. For read-only investigation or data analysis, run `codex exec -s read-only` with a self-contained prompt. Claude models run via the Agent/Workflow `model` parameter: `'sonnet'` or `'fable'`.
+- Never use Haiku.
+- Mechanics: Codex models (gpt-5.6-sol, gpt-6-astra) are only reachable through the Codex CLI. Never rely on the defaults in `~/.codex/config.toml`; they drift (it has pointed at other models before). Pass the model and effort explicitly on every call: `codex exec -m gpt-5.6-sol -c model_reasoning_effort=medium` for the workhorse, `-m gpt-6-astra -c model_reasoning_effort=high` for a review (`-c model="gpt-6-astra"` for `codex review`). For read-only investigation or data analysis, run `codex exec -s read-only` with a self-contained prompt. Claude models run via the Agent/Workflow `model` parameter: `'sonnet'`, `'opus'`, or `'fable'`.
 
 Using Codex models inside workflows and subagents (the `model` parameter only accepts Claude models, so wrap it):
 - Spawn a thin Claude wrapper agent, `model: 'sonnet', effort: 'low'`, whose only job is to write a self-contained Codex prompt, run it via Bash, and return the result. Put a `schema` on the wrapper to get structured output back.
-- Write the prompt to a file and feed it to Codex over stdin (`codex exec -m gpt-6-astra < prompt.md`), not as an inline argument. Long inline prompts break on shell quoting and get truncated; a file is reliable and lets the prompt carry all the context Codex needs in one shot.
+- Write the prompt to a file and feed it to Codex over stdin (`codex exec -m gpt-5.6-sol -c model_reasoning_effort=medium < prompt.md`), not as an inline argument. Long inline prompts break on shell quoting and get truncated; a file is reliable and lets the prompt carry all the context Codex needs in one shot.
 - Label these agents with the model slug as a prefix, e.g. `{label: 'gpt-6-astra:review-auth'}` or `{label: 'gpt-5.6-sol:migrate-schema'}`. The workflow UI only shows the wrapper's Claude model, so the label is the only signal of who did the work.
 - Codex runs can blow past Bash's 10-minute timeout; for anything that might run long, launch through herdr (below) instead of background Bash so the run survives the wrapper.
 - Parallel Codex implementation agents must use `isolation: 'worktree'` so their edits don't collide in the shared checkout.
@@ -49,7 +50,7 @@ Running long Codex (or other CLI-agent) tasks under herdr:
 - Headless runs use *pane* commands only. `herdr agent start` is for launching an interactive TUI agent into an existing shell pane (`--kind`, `--pane`); it cannot run an arbitrary command and rejects `--workspace`/`--cwd`. Don't reach for it, and don't run `herdr --skill` or `--help` to rediscover this.
 - The server is shared with other sessions: pick a short session tag and create one workspace per session, one pane per task. Read IDs from the JSON, never guess them:
   `OUT=$(herdr workspace create --label cc-<tag> --cwd <dir> --no-focus)`; `WS=$(jq -r .result.workspace.workspace_id <<<"$OUT")`; `P=$(jq -r .result.root_pane.pane_id <<<"$OUT")`. Extra tasks: `herdr tab create --workspace $WS --cwd <dir> --no-focus` (same `.result.root_pane.pane_id` shape). Never touch panes you didn't create.
-- Launch: `herdr pane run $P "bash -c 'codex exec ... < prompt.md > report.md 2> stderr.log; echo DONE_<tag>'"`. `pane run` types the command into the shell and presses Enter, so the pane must be at a shell prompt.
+- Launch: `herdr pane run $P "bash -c 'codex exec -m <model> -c model_reasoning_effort=<level> ... < prompt.md > report.md 2> stderr.log; echo DONE_<tag>'"`. `pane run` types the command into the shell and presses Enter, so the pane must be at a shell prompt.
 - Block with `herdr pane wait-output $P --regex '^DONE_<tag>$' --timeout <ms>`. Anchor the regex: the pane echoes the typed command line, so a bare `--match DONE_<tag>` fires immediately on the echo, before the job has run. Tail with `herdr pane read $P --source recent-unwrapped --lines <n>`; fleet with `herdr pane list --workspace $WS`. Ignore `agent_status` for headless runs (TUI-only detection); the sentinel plus the report file is the truth.
 - `herdr pane close $P` finished panes (leave failures open). Closing the last pane removes the workspace; otherwise `herdr workspace close $WS` at session end.
 
