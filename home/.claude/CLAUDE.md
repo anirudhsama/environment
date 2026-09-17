@@ -46,10 +46,12 @@ Using Codex models inside workflows and subagents (the `model` parameter only ac
 Running long Codex (or other CLI-agent) tasks under herdr:
 - The herdr server owns the process, so runs survive wrapper/Bash death and output stays readable. CLI-launched work only: Agent/Workflow subagents are in-process API calls, and herdr can't manage those.
 - If `herdr status server` says it's down, start `herdr server` as a background Bash task.
-- The server is shared with other sessions: pick a short session tag, `herdr workspace create --label cc-<tag> --no-focus`, launch everything into that workspace, and never touch panes you didn't start.
-- Launch: `herdr agent start cc-<tag>-<task> --workspace <ws_id> --cwd <dir> --no-focus -- bash -c 'codex exec < prompt.md > report.md; echo DONE_<tag>'`; note the `pane_id`.
-- Block with `herdr wait output <pane_id> --match DONE_<tag> --timeout <ms>`; fleet = `herdr agent list` filtered on your `workspace_id`; tail via `herdr agent read`. Ignore `agent_status` for headless runs (TUI-only detection); the sentinel plus the report file is the truth.
-- `herdr pane close` finished panes (leave failures open); `herdr workspace close <ws_id>` at session end.
+- Headless runs use *pane* commands only. `herdr agent start` is for launching an interactive TUI agent into an existing shell pane (`--kind`, `--pane`); it cannot run an arbitrary command and rejects `--workspace`/`--cwd`. Don't reach for it, and don't run `herdr --skill` or `--help` to rediscover this.
+- The server is shared with other sessions: pick a short session tag and create one workspace per session, one pane per task. Read IDs from the JSON, never guess them:
+  `OUT=$(herdr workspace create --label cc-<tag> --cwd <dir> --no-focus)`; `WS=$(jq -r .result.workspace.workspace_id <<<"$OUT")`; `P=$(jq -r .result.root_pane.pane_id <<<"$OUT")`. Extra tasks: `herdr tab create --workspace $WS --cwd <dir> --no-focus` (same `.result.root_pane.pane_id` shape). Never touch panes you didn't create.
+- Launch: `herdr pane run $P "bash -c 'codex exec ... < prompt.md > report.md 2> stderr.log; echo DONE_<tag>'"`. `pane run` types the command into the shell and presses Enter, so the pane must be at a shell prompt.
+- Block with `herdr pane wait-output $P --regex '^DONE_<tag>$' --timeout <ms>`. Anchor the regex: the pane echoes the typed command line, so a bare `--match DONE_<tag>` fires immediately on the echo, before the job has run. Tail with `herdr pane read $P --source recent-unwrapped --lines <n>`; fleet with `herdr pane list --workspace $WS`. Ignore `agent_status` for headless runs (TUI-only detection); the sentinel plus the report file is the truth.
+- `herdr pane close $P` finished panes (leave failures open). Closing the last pane removes the workspace; otherwise `herdr workspace close $WS` at session end.
 
 ## Sideshow Visuals
 
