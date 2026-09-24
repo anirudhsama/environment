@@ -7,9 +7,9 @@
 - TypeScript is the default. Most of what I work on is TS.
 - Use Bun for everything: `bunx` to install and run packages (never npm or yarn), `bun` as the runtime, and `bun test` as the test runner. Reach for Bun first; only fall back when a repo genuinely can't use it.
 - Be terse. Lead with the answer, cut the preamble, and keep comments to the ones that earn their place.
-- Bias toward prose unless we are actively implementing, debugging, reviewing, or prototyping code, or I explicitly ask for snippets. In brainstorming, design discussion, planning, tradeoff analysis, product thinking, and architecture conversations, do not pad the response with code examples.
+- Prose is the default in brainstorming, design discussion, planning, tradeoff analysis, product thinking, and architecture conversations. Code snippets belong in implementation, debugging, review, and prototyping, or when I ask for them.
 - Scope is the request. A pre-existing bug, a perf concern, or behaviour the task never mentioned goes in the summary as a follow-up, unless the requested behaviour cannot work without it. Commit tests only where the task asks for them or the repo already keeps tests for that kind of change, sized like the neighbouring test files. Scratch checks stay scratch.
-- Web search and URL fetches go through the Exa MCP. Anything newer than your training data gets searched, not recalled. To scope results to specific sites or dates, use `web_search_advanced_exa` and its domain/date filters instead of typing `site:` into the query. `web_fetch_exa` takes a `urls` array, not `url`; raise `maxCharacters` when reading full docs pages.
+- Web search and URL fetches go through the Exa MCP. Anything newer than your training data gets searched, not recalled; a name you only half-recognize from a fast-moving area (AI models, developer tools) is a search too, with the name as I wrote it in at least one query. To scope results to specific sites or dates, use `web_search_advanced_exa` and its domain/date filters instead of typing `site:` into the query. `web_fetch_exa` takes a `urls` array, not `url`; raise `maxCharacters` when reading full docs pages.
 
 ## Machines
 

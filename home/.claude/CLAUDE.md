@@ -6,10 +6,10 @@
 
 - TypeScript is the default. Most of what I work on is TS.
 - Use Bun for everything: `bunx` to install and run packages (never npm or yarn), `bun` as the runtime, and `bun test` as the test runner. Reach for Bun first; only fall back when a repo genuinely can't use it.
-- Be terse. Lead with the answer, cut the preamble, and keep comments to the ones that earn their place.
-- Bias toward prose unless we are actively implementing, debugging, reviewing, or prototyping code, or I explicitly ask for snippets. In brainstorming, design discussion, planning, tradeoff analysis, product thinking, and architecture conversations, do not pad the response with code examples.
+- Be terse. Lead with the answer, in plain literal phrasing with no mannered prose, and keep code comments to the ones that earn their place. A one-line note before you start and a short recap at the end are welcome; padding between them is not.
+- Prose is the default in brainstorming, design discussion, planning, tradeoff analysis, product thinking, and architecture conversations. Code snippets belong in implementation, debugging, review, and prototyping, or when I ask for them.
 - Scope is the request. A pre-existing bug, a perf concern, or behaviour the task never mentioned goes in the summary as a follow-up, unless the requested behaviour cannot work without it. Commit tests only where the task asks for them or the repo already keeps tests for that kind of change, sized like the neighbouring test files. Scratch checks stay scratch.
-- Web search and URL fetches go through the Exa MCP. Anything newer than your training data gets searched, not recalled. To scope results to specific sites or dates, use `web_search_advanced_exa` and its domain/date filters instead of typing `site:` into the query. `web_fetch_exa` takes a `urls` array, not `url`; raise `maxCharacters` when reading full docs pages.
+- Web search and URL fetches go through the Exa MCP. Anything newer than your training data gets searched, not recalled; a name you only half-recognize from a fast-moving area (AI models, developer tools) is a search too, with the name as I wrote it in at least one query. To scope results to specific sites or dates, use `web_search_advanced_exa` and its domain/date filters instead of typing `site:` into the query. `web_fetch_exa` takes a `urls` array, not `url`; raise `maxCharacters` when reading full docs pages.
 
 ## Picking the right models for workflows and subagents
 
@@ -21,38 +21,22 @@ Rankings are higher = better on each axis. Cost is what I actually pay through m
 |-------------|------|--------------|-------|
 | gpt-5.6-sol | 6    | 7            | 5     |
 | sonnet-5    | 5    | 5            | 5     |
+| opus-5.5    | 5    | 8            | 8     |
 | gpt-6-astra | 4    | 8            | 8     |
-| opus-5      | 3    | 7            | 7     |
 | fable-5.1   | 2    | 9            | 9     |
 
 How to apply:
 - These are defaults, not limits; you have standing permission to override them. If a cheaper model's output misses the bar, redo the work with a stronger one without asking. Judge the output, not the price tag; escalating costs less than shipping something mediocre.
 - Cost is only a tie-breaker. When the axes conflict on anything that ships, intelligence > taste > cost.
-- The workhorse is gpt-5.6-sol at `medium`: implementation, data analysis, migrations, debugging, refactors. Bump it to `high` when the task warrants it. Reserve gpt-6-astra for reviews and for the taste-gated work below; don't pick it just because the task looks hard.
-- Anything user-facing (UI, copy, API design) needs taste ≥ 7, which rules out Sol and Sonnet. Small UI work goes to opus-5; larger or intelligence-sensitive UI work to gpt-6-astra or fable-5.1.
-- Reviews of plans or implementations: fable-5.1 at `high`, with gpt-6-astra at `high` as the second opinion. Use both when the change matters.
-- Effort is the second lever after model. A `fable` agent at `effort: 'low'` or `'medium'` is a real option for routine work. Keep `high` for reviews and anything intelligence-sensitive; `xhigh` and `max` only where the gain is measured.
+- The workhorse is opus-5.5 at `medium`, its default: implementation, debugging, refactors, migrations, data analysis, and long unattended runs. gpt-5.6-sol at `medium` takes over when a fan-out is wide enough that my Claude limits become the constraint, or for bulk mechanical work where taste doesn't matter.
+- fable-5.1 at `low` is often competitive with Opus and Sonnet on cost per task while scoring higher, so it is the other option for routine work. sonnet-5 is for thin wrappers and mechanical stages only.
+- Anything user-facing (UI, copy, API design) needs taste ≥ 7, which rules out Sol and Sonnet. Small UI work goes to opus-5.5; larger or intelligence-sensitive UI work to gpt-6-astra or fable-5.1. Opus falls back on stock frontend styles without direction, so name the specific patterns to avoid rather than asking for a non-generic look.
+- Reviews of plans or implementations: fable-5.1 at `high`, with gpt-6-astra at `high` as the second opinion. Use both when the change matters. opus-5.5 at `medium` is the cheap first pass.
+- Effort is the second lever after model. The Workflow `agent()` call takes `effort`; the Agent tool does not, and inherits the session's `high`. Keep `high` for reviews and anything intelligence-sensitive; `xhigh` and `max` only where the gain is measured.
+- Defaults to know: an Agent or `agent()` call with no `model` inherits the session model (fable-5.1); the built-in Explore and Plan agents run opus-5.5. Set `model: 'opus'` explicitly for workhorse subagents.
+- Opus 5.5 paces itself by elapsed time. For a team of Opus subagents, put a time budget in the prompt when you can estimate one; otherwise the line "Time matters here: do not spend time that can be avoided, and the earlier a correct result is obtained, the better."
 - Never use Haiku.
-- Mechanics: Codex models (gpt-5.6-sol, gpt-6-astra) are only reachable through the Codex CLI. Never rely on the defaults in `~/.codex/config.toml`; they drift (it has pointed at other models before). Pass the model and effort explicitly on every call: `codex exec -m gpt-5.6-sol -c model_reasoning_effort=medium` for the workhorse, `-m gpt-6-astra -c model_reasoning_effort=high` for a review (`-c model="gpt-6-astra"` for `codex review`). For read-only investigation or data analysis, run `codex exec -s read-only` with a self-contained prompt. Claude models run via the Agent/Workflow `model` parameter: `'sonnet'`, `'opus'`, or `'fable'`.
-
-Using Codex models inside workflows and subagents (the `model` parameter only accepts Claude models, so wrap it):
-- Spawn a thin Claude wrapper agent, `model: 'sonnet', effort: 'low'`, whose only job is to write a self-contained Codex prompt, run it via Bash, and return the result. Put a `schema` on the wrapper to get structured output back.
-- Write the prompt to a file and feed it to Codex over stdin (`codex exec -m gpt-5.6-sol -c model_reasoning_effort=medium < prompt.md`), not as an inline argument. Long inline prompts break on shell quoting and get truncated; a file is reliable and lets the prompt carry all the context Codex needs in one shot.
-- Label these agents with the model slug as a prefix, e.g. `{label: 'gpt-6-astra:review-auth'}` or `{label: 'gpt-5.6-sol:migrate-schema'}`. The workflow UI only shows the wrapper's Claude model, so the label is the only signal of who did the work.
-- Codex runs can blow past Bash's 10-minute timeout; for anything that might run long, launch through herdr (below) instead of background Bash so the run survives the wrapper.
-- Parallel Codex implementation agents must use `isolation: 'worktree'` so their edits don't collide in the shared checkout.
-- `codex exec` refuses to run outside a trusted directory (trust is per path in `~/.codex/config.toml`); from a fresh worktree or temp dir add `--skip-git-repo-check`.
-- Workflow token budgets only count Claude tokens; Codex work is free and invisible to `budget.spent()`.
-
-Running long Codex (or other CLI-agent) tasks under herdr:
-- The herdr server owns the process, so runs survive wrapper/Bash death and output stays readable. CLI-launched work only: Agent/Workflow subagents are in-process API calls, and herdr can't manage those.
-- If `herdr status server` says it's down, start `herdr server` as a background Bash task.
-- Headless runs use *pane* commands only. `herdr agent start` is for launching an interactive TUI agent into an existing shell pane (`--kind`, `--pane`); it cannot run an arbitrary command and rejects `--workspace`/`--cwd`. Don't reach for it, and don't run `herdr --skill` or `--help` to rediscover this.
-- The server is shared with other sessions: pick a short session tag and create one workspace per session, one pane per task. Read IDs from the JSON, never guess them:
-  `OUT=$(herdr workspace create --label cc-<tag> --cwd <dir> --no-focus)`; `WS=$(jq -r .result.workspace.workspace_id <<<"$OUT")`; `P=$(jq -r .result.root_pane.pane_id <<<"$OUT")`. Extra tasks: `herdr tab create --workspace $WS --cwd <dir> --no-focus` (same `.result.root_pane.pane_id` shape). Never touch panes you didn't create.
-- Launch: `herdr pane run $P "bash -c 'codex exec -m <model> -c model_reasoning_effort=<level> ... < prompt.md > report.md 2> stderr.log; echo DONE_<tag>'"`. `pane run` types the command into the shell and presses Enter, so the pane must be at a shell prompt.
-- Block with `herdr pane wait-output $P --regex '^DONE_<tag>$' --timeout <ms>`. Anchor the regex: the pane echoes the typed command line, so a bare `--match DONE_<tag>` fires immediately on the echo, before the job has run. Tail with `herdr pane read $P --source recent-unwrapped --lines <n>`; fleet with `herdr pane list --workspace $WS`. Ignore `agent_status` for headless runs (TUI-only detection); the sentinel plus the report file is the truth.
-- `herdr pane close $P` finished panes (leave failures open). Closing the last pane removes the workspace; otherwise `herdr workspace close $WS` at session end.
+- Claude models run via the Agent/Workflow `model` parameter: `'sonnet'`, `'opus'`, or `'fable'`. Codex models (gpt-5.6-sol, gpt-6-astra) run only through the Codex CLI; the exact flags, the wrapper-agent pattern for workflows, and herdr for long runs are in `~/.claude/codex.md`. Read it before any Codex call.
 
 ## Sideshow Visuals
 
