@@ -9,7 +9,7 @@
 - Be terse. Lead with the answer, cut the preamble, and keep comments to the ones that earn their place.
 - Bias toward prose unless we are actively implementing, debugging, reviewing, or prototyping code, or I explicitly ask for snippets. In brainstorming, design discussion, planning, tradeoff analysis, product thinking, and architecture conversations, do not pad the response with code examples.
 - Scope is the request. A pre-existing bug, a perf concern, or behaviour the task never mentioned goes in the summary as a follow-up, unless the requested behaviour cannot work without it. Commit tests only where the task asks for them or the repo already keeps tests for that kind of change, sized like the neighbouring test files. Scratch checks stay scratch.
-- Web search and URL fetches go through the Exa MCP (`web_search_exa`, `web_fetch_exa`). Anything newer than your training data gets searched, not recalled.
+- Web search and URL fetches go through the Exa MCP. Anything newer than your training data gets searched, not recalled. To scope results to specific sites or dates, use `web_search_advanced_exa` and its domain/date filters instead of typing `site:` into the query. `web_fetch_exa` takes a `urls` array, not `url`; raise `maxCharacters` when reading full docs pages.
 
 ## Picking the right models for workflows and subagents
 
