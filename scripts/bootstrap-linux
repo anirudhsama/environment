@@ -30,6 +30,15 @@ fi
 sudo sed -i -E 's/^HISTORY=.*/HISTORY=28/' /etc/conf.d/sysstat
 sudo systemctl enable --now atop.service sysstat.service
 
+# Keep the QXL display driver out. VMs deployed from a volume (the to-vdo.sh
+# cutover) get a QXL adapter instead of virtio-gpu, and QXL's fbdev console
+# deadlocks once its 16M VRAM runs dry: "[TTM] Buffer eviction failed" floods
+# the log, then PID 1 blocks on a console write and the box needs a hard reset.
+if ! grep -q 'modprobe.blacklist=qxl' /etc/default/grub; then
+  sudo sed -i -E 's/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"$/\1 modprobe.blacklist=qxl"/' /etc/default/grub
+  sudo grub-mkconfig -o /boot/grub/grub.cfg
+fi
+
 # Gradle memory ceilings are a tracked dotfile now — see [dotfiles] in
 # mise.linux.toml, which links home/.gradle/gradle.properties.linux.
 
