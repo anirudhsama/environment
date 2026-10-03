@@ -26,6 +26,17 @@ if [[ ! -x "$HOME/.local/bin/t3" ]]; then
 fi
 "$HOME/.local/bin/t3" service install --base-dir "$HOME/.t3"
 
+# OpenCode 2 always requires a server password and generates a new one on
+# every start, which breaks saved client logins. The dev.mise.opencode drop-in
+# reads a fixed one from this untracked file. The unit is applied before this
+# task runs, so restart it once the file exists.
+opencode_env="$HOME/.config/opencode/serve.env"
+if [[ ! -f "$opencode_env" ]]; then
+  mkdir -p "$(dirname "$opencode_env")"
+  (umask 077 && printf 'OPENCODE_SERVER_PASSWORD=%s\n' "$(openssl rand -hex 24)" >"$opencode_env")
+  systemctl --user restart dev.mise.opencode.service || true
+fi
+
 # 28 days of history: atop for process-level, sysstat/sar for CPU + memory.
 sudo sed -i -E 's/^HISTORY=.*/HISTORY=28/' /etc/conf.d/sysstat
 sudo systemctl enable --now atop.service sysstat.service

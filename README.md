@@ -57,8 +57,9 @@ enables `mise self-update`, and mise ships near-daily so every distro lags it.
 3. **A vendor self-updater** only where lifecycle semantics require it: herdr's
    live handoff, and mise itself.
 
-Claude, Codex, OpenCode, and Grok use the same mise backends selected by
-Omarchy, declared normally in the tracked global mise config.
+Claude and Codex use the same mise backends selected by Omarchy. OpenCode 2,
+Grok, and Pi come from npm through mise, because Omarchy's OpenCode backend only
+ships V1. All of them are declared in the tracked global mise config.
 
 `update` on the devbox refreshes all three.
 
@@ -71,6 +72,7 @@ Omarchy, declared normally in the tracked global mise config.
 | `~/.claude/settings.local.json` | machine-local Claude Code settings |
 | `~/.codex/config.toml` | Codex rewrites this at runtime; seed from `home/.codex/config.toml.example` |
 | `~/.codex/auth.json`, `~/.local/share/atuin/key` | credentials — back up via 1Password, not git |
+| `~/.config/opencode/serve.env` | devbox OpenCode server password; `bootstrap-linux` generates it if missing |
 
 ## Notes
 
@@ -85,6 +87,10 @@ Omarchy, declared normally in the tracked global mise config.
   ignored. It becomes the default in mise 2027.6.0.
 - `= "latest"` means "newest at install time", not "always newest" — an
   installed version satisfies it. `mise upgrade` is what moves tools forward.
+- The devbox OpenCode server (`dev.mise.opencode.service`) listens on the
+  Tailscale address at port 4096. OpenCode 2 can't run without a password and
+  invents a new one on every start, so the unit reads a fixed one from
+  `serve.env`. Connect clients with username `opencode` and that password.
 - The DevboxDrop LaunchAgent stays a hand-written plist: it's `WatchPaths`
   driven and mise's launchd schema has no `WatchPaths`/`ThrottleInterval`.
 - Lean reference clones live in `~/code/references` (effect, opencode, t3code),
