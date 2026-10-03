@@ -41,6 +41,7 @@ codex = "latest"
 # xAI's npm package keeps the native binary under ~/.grok/bin. Re-run its
 # postinstall from the mise install so that symlink follows the mise version.
 "npm:@xai-official/grok" = { version = "latest", postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@xai-official/grok/bin/postinstall.js"' }
+"npm:@earendil-works/pi-coding-agent" = "latest"
 
 [settings]
 experimental = true
@@ -50,6 +51,7 @@ minimum_release_age_excludes = [
   "codex",
   "npm:@opencode/cli",
   "npm:@xai-official/grok",
+  "npm:@earendil-works/pi-coding-agent",
 ]
 trusted_config_paths = [
   "/Users/ani/conductor/workspaces",
