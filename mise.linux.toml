@@ -87,6 +87,7 @@
 [dotfiles]
 "~/.gradle/gradle.properties" = { source = "home/.gradle/gradle.properties.linux", mode = "symlink" }
 "~/.config/systemd/user/t3code.service.d/network.conf" = { source = "home/.config/systemd/user/t3code.service.d/network.conf", mode = "symlink" }
+"~/.config/systemd/user/dev.mise.opencode.service.d/password.conf" = { source = "home/.config/systemd/user/dev.mise.opencode.service.d/password.conf", mode = "symlink" }
 
 # --- 7. systemd user units ---------------------------------------------------
 # mise writes and enables these directly, namespaced as dev.mise.<name>.service.
