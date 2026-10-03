@@ -1,13 +1,15 @@
-# Running Codex models (gpt-5.6-sol, gpt-6-astra)
+# Running Codex models through the CLI
 
-Codex models are only reachable through the Codex CLI. Never rely on the defaults in `~/.codex/config.toml`; they drift (it has pointed at other models before). Pass the model and effort explicitly on every call: `codex exec -m gpt-5.6-sol -c model_reasoning_effort=medium` for bulk work, `-m gpt-6-astra -c model_reasoning_effort=high` for a review (`-c model="gpt-6-astra"` for `codex review`). For read-only investigation or data analysis, run `codex exec -s read-only` with a self-contained prompt.
+This is the route outside T3 Code. Inside T3 Code, use `delegate_task` as described in `CLAUDE.md`.
+
+Never rely on the defaults in `~/.codex/config.toml`; they drift (it has pointed at other models before). Pass the model and effort explicitly on every call: `codex exec -m gpt-6-astra -c model_reasoning_effort=high` for a review (`-c model="gpt-6-astra"` for `codex review`; same shape for `gpt-6.1-sol`). For read-only investigation or data analysis, run `codex exec -s read-only` with a self-contained prompt.
 
 ## Inside workflows and subagents
 
 The `model` parameter only accepts Claude models, so wrap it:
-- Spawn a thin Claude wrapper agent, `model: 'sonnet', effort: 'low'`, whose only job is to write a self-contained Codex prompt, run it via Bash, and return the result. Put a `schema` on the wrapper to get structured output back.
-- Write the prompt to a file and feed it to Codex over stdin (`codex exec -m gpt-5.6-sol -c model_reasoning_effort=medium < prompt.md`), not as an inline argument. Long inline prompts break on shell quoting and get truncated; a file is reliable and lets the prompt carry all the context Codex needs in one shot.
-- Label these agents with the model slug as a prefix, e.g. `{label: 'gpt-6-astra:review-auth'}` or `{label: 'gpt-5.6-sol:migrate-schema'}`. The workflow UI only shows the wrapper's Claude model, so the label is the only signal of who did the work.
+- Spawn a thin Claude wrapper agent, `model: 'opus', effort: 'low'`, whose only job is to write a self-contained Codex prompt, run it via Bash, and return the result. Put a `schema` on the wrapper to get structured output back.
+- Write the prompt to a file and feed it to Codex over stdin (`codex exec -m gpt-6-astra -c model_reasoning_effort=high < prompt.md`), not as an inline argument. Long inline prompts break on shell quoting and get truncated; a file is reliable and lets the prompt carry all the context Codex needs in one shot.
+- Label these agents with the model slug as a prefix, e.g. `{label: 'gpt-6-astra:review-auth'}` or `{label: 'gpt-6.1-sol:review-migration'}`. The workflow UI only shows the wrapper's Claude model, so the label is the only signal of who did the work.
 - Codex runs can blow past Bash's 10-minute timeout; for anything that might run long, launch through herdr (below) instead of background Bash so the run survives the wrapper.
 - Parallel Codex implementation agents must use `isolation: 'worktree'` so their edits don't collide in the shared checkout.
 - `codex exec` refuses to run outside a trusted directory (trust is per path in `~/.codex/config.toml`); from a fresh worktree or temp dir add `--skip-git-repo-check`.
