@@ -34,7 +34,10 @@ hasura-cli = "latest"
 # is explicit because that is Omarchy's package choice and xAI's published CLI.
 claude = "latest"
 codex = "latest"
-opencode = "latest"
+# OpenCode 2 ships on npm; the bare `opencode` alias follows the V1-only aqua
+# backend. mise skips install scripts, so run the postinstall that selects the
+# native binary.
+"npm:@opencode/cli" = { version = "latest", postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@opencode/cli/postinstall.mjs"' }
 # xAI's npm package keeps the native binary under ~/.grok/bin. Re-run its
 # postinstall from the mise install so that symlink follows the mise version.
 "npm:@xai-official/grok" = { version = "latest", postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@xai-official/grok/bin/postinstall.js"' }
@@ -45,7 +48,7 @@ idiomatic_version_file_enable_tools = ["python"]
 minimum_release_age_excludes = [
   "claude",
   "codex",
-  "opencode",
+  "npm:@opencode/cli",
   "npm:@xai-official/grok",
 ]
 trusted_config_paths = [

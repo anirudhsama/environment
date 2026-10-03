@@ -97,9 +97,9 @@
 # invisible to LSP servers, npx-based MCP servers and formatters.
 [bootstrap.linux.systemd.units.opencode]
 description = "OpenCode remote server"
-after = ["network-online.target"]
+after = ["network-online.target", "tailscaled.service"]
 type = "simple"
-exec_start = "%h/.local/bin/mise exec -- opencode serve --hostname 0.0.0.0 --port 4096"
+exec_start = "%h/.local/bin/mise exec -- opencode serve --hostname 100.126.136.111 --port 4096"
 restart = "always"
 restart_sec = "5"
 wanted_by = ["default.target"]
