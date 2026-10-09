@@ -1,4 +1,4 @@
-min_version = "2026.9.9"
+min_version = "2026.10.4"
 
 # Machine provisioning, shared across both machines. Run `mise bootstrap` from
 # this directory to make the machine match the repo. Idempotent — it converges,

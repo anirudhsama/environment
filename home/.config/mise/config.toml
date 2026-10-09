@@ -32,16 +32,22 @@ hasura-cli = "latest"
 
 # Coding agents. Bare mise aliases follow the same backends Omarchy uses; Grok
 # is explicit because that is Omarchy's package choice and xAI's published CLI.
-claude = "latest"
-codex = "latest"
+#
+# auto_update keeps them on the newest release without `mise upgrade`. The
+# mise-tool-update service below does the updating in the background; while it
+# runs, shim and `mise x` launches skip their own update and never wait on a
+# download. Agents run straight from PATH under activation never update on
+# launch at all.
+claude = { version = "latest", auto_update = true }
+codex = { version = "latest", auto_update = true }
 # OpenCode 2 ships on npm; the bare `opencode` alias follows the V1-only aqua
 # backend. mise skips install scripts, so run the postinstall that selects the
 # native binary.
-"npm:@opencode/cli" = { version = "latest", postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@opencode/cli/postinstall.mjs"' }
+"npm:@opencode/cli" = { version = "latest", auto_update = true, postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@opencode/cli/postinstall.mjs"' }
 # xAI's npm package keeps the native binary under ~/.grok/bin. Re-run its
 # postinstall from the mise install so that symlink follows the mise version.
-"npm:@xai-official/grok" = { version = "latest", postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@xai-official/grok/bin/postinstall.js"' }
-"npm:@earendil-works/pi-coding-agent" = "latest"
+"npm:@xai-official/grok" = { version = "latest", auto_update = true, postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@xai-official/grok/bin/postinstall.js"' }
+"npm:@earendil-works/pi-coding-agent" = { version = "latest", auto_update = true }
 
 [settings]
 experimental = true
@@ -61,3 +67,10 @@ trusted_config_paths = [
   "/Users/ani/.codex/worktrees",
 ]
 lockfile = true
+
+# Background updater for the auto_update tools above: a LaunchAgent on macOS, a
+# systemd user unit on Linux (linger is enabled by bootstrap-linux). Checks
+# hourly, updates each tool once its interval (tool_update.check_duration,
+# default 24h) is due. Built-in services must live in global config.
+[bootstrap.services.mise-tool-update]
+builtin = "tool-update"
