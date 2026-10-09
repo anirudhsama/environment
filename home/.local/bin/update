@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The one manual chore Arch demands. Run weekly, at the keyboard.
+# Full devbox upgrade, run on demand at the keyboard: Arch packages, mise, herdr.
 set -euo pipefail
 
 echo ">> Consider a CloudPe snapshot before kernel/major updates."
@@ -35,11 +35,6 @@ if command -v mise >/dev/null 2>&1; then
 fi
 
 # Tools that manage their own updates, so neither pacman nor mise sees them.
-
-# The standalone T3 CLI updates its pinned runtime and native systemd service.
-if command -v t3 >/dev/null 2>&1; then
-  t3 update --yes --base-dir "$HOME/.t3" || true
-fi
 
 # --handoff swaps the herdr server without killing running agent sessions.
 if command -v herdr >/dev/null 2>&1; then
