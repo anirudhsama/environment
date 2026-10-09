@@ -21,10 +21,17 @@ sudo loginctl enable-linger "$USER"
 # T3 Code owns its service lifecycle so updates can trial a new runtime and
 # roll back a failed handoff. Its systemd drop-in binds it to Devbox's stable
 # Tailscale address, reachable through MagicDNS as http://devbox:3773.
+#
+# Install the service once. Server updates from the desktop app move the
+# running server but not the ~/.local/bin/t3 symlink, so re-running an older
+# `t3 service install` later refuses to downgrade and fails bootstrap. The
+# tracked drop-in alone doesn't count: check for the unit file itself.
 if [[ ! -x "$HOME/.local/bin/t3" ]]; then
   curl -fsSL https://t3.codes/install.sh | T3CODE_CHANNEL=nightly sh
 fi
-"$HOME/.local/bin/t3" service install --base-dir "$HOME/.t3"
+if [[ -z "$(systemctl --user show -p FragmentPath --value t3code.service)" ]]; then
+  "$HOME/.local/bin/t3" service install --base-dir "$HOME/.t3"
+fi
 
 # OpenCode 2 always requires a server password and generates a new one on
 # every start, which breaks saved client logins. The dev.mise.opencode drop-in
