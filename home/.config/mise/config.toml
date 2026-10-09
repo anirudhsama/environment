@@ -20,24 +20,18 @@ fnox = "latest"
 usage = "latest"
 
 # CLIs with no OS package, or where the OS package split the two machines.
-hunkdiff = "latest"            # aqua:modem-dev/hunk — native binary, no node
+hunkdiff = { version = "latest", auto_update = true } # aqua:modem-dev/hunk — native binary, no node
 doppler = "latest"
 hasura-cli = "latest"
 "github:RevenueCat/revenuecat-cli" = { version = "latest", matching = "rc_" }
 
 # npm-only CLIs shared by every machine.
-"npm:eas-cli" = "latest"
-"npm:vercel" = "latest"
-"npm:agent-browser" = "latest"
+"npm:eas-cli" = { version = "latest", auto_update = true }
+"npm:vercel" = { version = "latest", auto_update = true }
+"npm:agent-browser" = { version = "latest", auto_update = true }
 
 # Coding agents. Bare mise aliases follow the same backends Omarchy uses; Grok
 # is explicit because that is Omarchy's package choice and xAI's published CLI.
-#
-# auto_update keeps them on the newest release without `mise upgrade`. The
-# mise-tool-update service below does the updating in the background; while it
-# runs, shim and `mise x` launches skip their own update and never wait on a
-# download. Agents run straight from PATH under activation never update on
-# launch at all.
 claude = { version = "latest", auto_update = true }
 codex = { version = "latest", auto_update = true }
 # OpenCode 2 ships on npm; the bare `opencode` alias follows the V1-only aqua
@@ -68,9 +62,13 @@ trusted_config_paths = [
 ]
 lockfile = true
 
-# Background updater for the auto_update tools above: a LaunchAgent on macOS, a
+# Background updater for the auto_update tools above (agents and fast-moving
+# CLIs), so they stay current without `mise upgrade`: a LaunchAgent on macOS, a
 # systemd user unit on Linux (linger is enabled by bootstrap-linux). Checks
 # hourly, updates each tool once its interval (tool_update.check_duration,
-# default 24h) is due. Built-in services must live in global config.
+# default 24h) is due. While it runs, shim and `mise x` launches skip their own
+# update and never wait on a download; tools run straight from PATH under
+# activation never update on launch at all. Built-in services must live in
+# global config.
 [bootstrap.services.mise-tool-update]
 builtin = "tool-update"
