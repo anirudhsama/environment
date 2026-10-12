@@ -44,7 +44,6 @@ min_version = "2026.10.4"
 [dotfiles]
 "~/.bash_profile" = { source = "home/.bash_profile", mode = "symlink" }
 "~/.bashrc" = { source = "home/.bashrc", mode = "symlink" }
-"~/.gitattributes" = { source = "home/.gitattributes", mode = "symlink" }
 "~/.gitconfig" = { source = "home/.gitconfig", mode = "symlink" }
 "~/.agents/skills" = { source = "home/.agents/skills", mode = "symlink" }
 "~/.claude" = { source = "home/.claude", mode = "symlink-each" }

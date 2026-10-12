@@ -2,8 +2,6 @@
 	name = Anirudh Coontoor
 	email = anirudh@gosupernova.live
 	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOnWj/jlOsP0znb44D4EXfm8dFg7InwEEPHIhq34ddYM
-[core]
-	attributesfile = ~/.gitattributes
 [init]
 	defaultBranch = main
 [filter "lfs"]
