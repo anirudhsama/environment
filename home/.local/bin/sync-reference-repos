@@ -2,6 +2,7 @@
 # Shallow clones of frequently-referenced public repos under ~/code/references.
 # Idempotent. On update, hard-resets to origin/<branch> — these are disposable
 # reference trees, not working copies. No GitHub auth required (public HTTPS).
+# Also fast-forwards the main branch of fork checkouts (FORKS) from upstream.
 #
 # Invoked by: mise bootstrap (via bootstrap-common), a daily systemd timer on
 # Linux, and a launchd agent on macOS.
@@ -12,6 +13,13 @@ REPOS=(
   "effect|https://github.com/effect-ts/effect.git|main"
   "opencode|https://github.com/anomalyco/opencode.git|dev"
   "t3code|https://github.com/pingdotgg/t3code.git|main"
+)
+
+# Working checkouts of forks: path|upstream url|branch. Unlike REPOS these hold
+# real work, so the branch only fast-forwards to upstream and anything that
+# would need a reset is skipped. origin stays the fork, for pushing branches.
+FORKS=(
+  "$HOME/code/t3code|https://github.com/pingdotgg/t3code.git|main"
 )
 
 dry_run=0
@@ -75,6 +83,33 @@ sync_one() {
   run git -C "$dest" gc --prune=now --quiet
 }
 
+sync_fork() {
+  local dest="$1" url="$2" branch="$3"
+
+  # Not every machine has every fork checked out.
+  [[ -d "$dest/.git" ]] || return 0
+
+  echo ">> fast-forward $dest $branch from upstream"
+  if git -C "$dest" remote get-url upstream >/dev/null 2>&1; then
+    run git -C "$dest" remote set-url upstream "$url"
+  else
+    run git -C "$dest" remote add upstream "$url"
+  fi
+  run git -C "$dest" fetch --quiet upstream "$branch"
+
+  if [[ "$(git -C "$dest" branch --show-current)" == "$branch" ]]; then
+    if [[ -n "$(git -C "$dest" status --porcelain)" ]]; then
+      echo "warning: $dest has uncommitted changes; not updating $branch" >&2
+      return 1
+    fi
+    run git -C "$dest" merge --ff-only --quiet "upstream/$branch"
+  else
+    # Refuses anything but a fast-forward, and a branch checked out in a
+    # linked worktree.
+    run git -C "$dest" fetch --quiet upstream "$branch:$branch"
+  fi
+}
+
 main() {
   if ! command -v git >/dev/null 2>&1; then
     echo "error: git is required" >&2
@@ -88,6 +123,14 @@ main() {
   for entry in "${REPOS[@]}"; do
     IFS='|' read -r name url branch <<<"$entry"
     if ! sync_one "$name" "$url" "$branch" "$root"; then
+      failed=1
+    fi
+  done
+
+  local path
+  for entry in "${FORKS[@]}"; do
+    IFS='|' read -r path url branch <<<"$entry"
+    if ! sync_fork "$path" "$url" "$branch"; then
       failed=1
     fi
   done
