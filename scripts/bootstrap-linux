@@ -23,13 +23,28 @@ sudo loginctl enable-linger "$USER"
 # T3 Connect tunnel always targets 127.0.0.1, and the tailnet reaches it
 # through Tailscale Serve below. `t3 connect` stays manual (browser sign-in).
 #
-# Install the service once. Server updates from the desktop app move the
-# running server but not the ~/.local/bin/t3 symlink, so re-running an older
-# `t3 service install` later refuses to downgrade and fails bootstrap. The
-# tracked drop-in alone doesn't count: check for the unit file itself.
+# Server updates from the desktop app move the running server (activeVersion in
+# service-state.json) but not a ~/.local/bin/t3 symlink, so a symlink goes stale
+# and an older `t3 service install` later refuses to downgrade. Make ~/.local/bin/t3
+# a wrapper that execs the active version instead. A real file rather than a
+# tracked dotfile: ~/.local/bin is shared with the Mac, and `t3 update` may
+# rewrite the path. The unit's ExecStart stays pinned to the version it was
+# installed from (a launcher shim), so don't prune that version directory.
+# The tracked drop-in alone doesn't count as installed: check for the unit file.
 if [[ ! -x "$HOME/.local/bin/t3" ]]; then
   curl -fsSL https://t3.codes/install.sh | T3CODE_CHANNEL=nightly sh
 fi
+t3_wrapper="$(mktemp "$HOME/.local/bin/.t3.XXXXXX")"
+cat >"$t3_wrapper" <<'WRAPPER'
+#!/usr/bin/env bash
+# Managed by scripts/bootstrap-linux. Runs the T3 version the service is on.
+set -euo pipefail
+home="${T3CODE_HOME:-$HOME/.t3}"
+version="$(sed -n 's/.*"activeVersion": *"\([^"]*\)".*/\1/p' "$home/runtime/service-state.json")"
+exec "$home/runtime/versions/${version:?no activeVersion in service-state.json}/t3" "$@"
+WRAPPER
+chmod 755 "$t3_wrapper"
+mv -f "$t3_wrapper" "$HOME/.local/bin/t3"
 if [[ -z "$(systemctl --user show -p FragmentPath --value t3code.service)" ]]; then
   "$HOME/.local/bin/t3" service install --base-dir "$HOME/.t3"
 fi
