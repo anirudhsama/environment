@@ -50,4 +50,15 @@ fi
 # subprocess picks up the newly-linked global [tools].
 mise install
 
+# --- Android CLI skill --------------------------------------------------------
+# Writes the android-cli skill into every agent's skill folder. The copy under
+# ~/.agents/skills lands in this repo and is gitignored; regenerating it here
+# keeps each machine on the CLI's current skill without git churn.
+if command -v android >/dev/null 2>&1; then
+  android init </dev/null >/dev/null
+fi
+
+# --- Simlock services (gateway on the devbox, worker on dev-mbp-14) ----------
+scripts/simlock-services
+
 echo "bootstrap: common steps done."

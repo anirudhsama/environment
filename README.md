@@ -63,6 +63,43 @@ ships V1. All of them are declared in the tracked global mise config.
 
 `update` on the devbox refreshes all three.
 
+## Android and device pool
+
+Every machine builds Android; only dev-mbp-14 runs devices.
+
+| Machine | Android SDK | Simlock |
+|---|---|---|
+| M5 (`anirudhs-mbp-14`) | `scripts/android-sdk` | client |
+| devbox | `scripts/android-sdk` | gateway, `https://devbox.<tailnet>.ts.net:8443` |
+| `dev-mbp-14` | `scripts/android-sdk --device-host` | worker: iOS simulators and Android emulators |
+
+- **Paths.** `ANDROID_HOME`, `ANDROID_SDK_ROOT` and `JAVA_HOME` are set in both
+  `.bashrc` (for `bash -lc`) and `config.fish`, and `~/.androidrc` (linked per
+  platform) points Android CLI at the same SDK with metrics off.
+- **Android CLI** comes from mise. `bootstrap-common` runs `android init`. The
+  skill copy it writes under `~/.agents/skills` is gitignored.
+- **Simlock** comes from mise and runs as its own login service
+  (`simlock daemon install`). `scripts/simlock-services` re-installs it when a
+  Node or simlock upgrade breaks the saved paths. The gateway and worker roles
+  are set up by hand once, because join tokens are secrets:
+
+  ```sh
+  # devbox
+  simlock --gateway daemon start
+  for c in stream input agent-device; do simlock --gateway config set capabilities.$c.enabled true; done
+  simlock --gateway token create --role worker --label dev-mbp-14
+  simlock --gateway token create --role agent --label <t3-server>   # one per T3 server
+  mise bootstrap                 # Tailscale Serve on :8443, systemd user unit
+
+  # dev-mbp-14 (stay logged in at the screen: the LaunchAgent needs a GUI session)
+  simlock config set gateway '{"url":"wss://devbox.<tailnet>.ts.net:8443","token":"slk_…","label":"dev-mbp-14"}'
+  for c in stream input agent-device; do simlock config set capabilities.$c.enabled true; done
+  mise bootstrap                 # LaunchAgent
+  ```
+
+  In T3: Settings → Labs → Simlock device hosts, then Settings → Devices → Add
+  source → Simlock pool, with the gateway URL and that server's agent token.
+
 ## Machine-local files (never committed)
 
 | File | Holds |
@@ -73,6 +110,7 @@ ships V1. All of them are declared in the tracked global mise config.
 | `~/.codex/config.toml` | Codex rewrites this at runtime; seed from `home/.codex/config.toml.example` |
 | `~/.codex/auth.json`, `~/.local/share/atuin/key` | credentials — back up via 1Password, not git |
 | `~/.config/opencode/serve.env` | devbox OpenCode server password; `bootstrap-linux` generates it if missing |
+| `~/.simlock/` | Simlock state, config and tokens; the worker's join token sits in `config.json` |
 
 ## Notes
 

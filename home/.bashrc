@@ -1,6 +1,21 @@
 # mise comes from the vendor installer on both platforms.
 export PATH="$HOME/.local/bin:$PATH"
 
+# Android SDK and the JDK Gradle runs on. Set here, not only in fish, because
+# agents run commands through `bash -lc`. config.fish sets the same values.
+case "$(uname)" in
+    Darwin)
+        export ANDROID_HOME="$HOME/Library/Android/sdk"
+        export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+        ;;
+    Linux)
+        export ANDROID_HOME="$HOME/android-sdk"
+        export JAVA_HOME="/usr/lib/jvm/default"
+        ;;
+esac
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+
 # Local additions run before mise so noninteractive commands prefer its shims.
 [[ -f ~/.bashrc.local ]] && . ~/.bashrc.local
 

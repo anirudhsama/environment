@@ -54,6 +54,11 @@ fi
 if tailscale status >/dev/null 2>&1; then
   tailscale funnel --https=443 off >/dev/null 2>&1 || true
   tailscale serve --bg --https=443 http://127.0.0.1:3773
+  # Simlock gateway, once it has been set up here. Workers dial
+  # wss://devbox.<tailnet>.ts.net:8443; agents and T3 use https:// there.
+  if [[ -d "$HOME/.simlock/gateway" ]]; then
+    tailscale serve --bg --https=8443 http://127.0.0.1:4700
+  fi
 fi
 
 # OpenCode 2 always requires a server password and generates a new one on

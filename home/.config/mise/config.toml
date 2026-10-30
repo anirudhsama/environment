@@ -30,6 +30,22 @@ hasura-cli = "latest"
 "npm:vercel" = { version = "latest", auto_update = true }
 "npm:agent-browser" = { version = "latest", auto_update = true }
 
+# Android CLI: mise installs the launcher, which keeps the real CLI under
+# ~/.android/bin and ~/.android/cli. ~/.androidrc picks the SDK per platform.
+android-cli = { version = "latest", auto_update = true }
+
+# Simlock device pool: the gateway runs on the devbox, the worker on
+# dev-mbp-14. Upgraded deliberately, not by auto_update: the gateway and
+# workers must stay protocol-compatible, and T3's Simlock source needs a
+# recent enough version. scripts/simlock-services re-installs the service
+# after an upgrade moves Node or simlock. Low npm download counts trip
+# mise's supply-chain check; the package is Callstack's, published from
+# callstackincubator/simlock.
+"npm:simlock" = { version = "0.4.0", allow_low_downloads = true }
+# The worker's agent-device must be the version T3 pins in
+# apps/server/src/device/deviceToolVersions.json.
+"npm:agent-device" = "0.21.31"
+
 # Coding agents. Bare mise aliases follow the same backends Omarchy uses; Grok
 # is explicit because that is Omarchy's package choice and xAI's published CLI.
 claude = { version = "latest", auto_update = true }

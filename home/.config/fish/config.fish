@@ -60,22 +60,22 @@ alias vim="nvim"
 alias yolo="claude --dangerously-skip-permissions"
 alias yolox="codex -c model_reasoning_effort=high --dangerously-bypass-approvals-and-sandbox -c model_reasoning_summary=detailed -c model_supports_reasoning_summaries=true"
 
-# Android SDK (devbox only; the Mac's lives at ~/Library/Android/sdk). This
-# used to be set in ~/.bashrc alone, so fish — the login shell — never had it
-# and Expo/RN work silently behaved differently between the two shells.
-if test (uname) = Linux; and test -d $HOME/android-sdk
-    set -gx ANDROID_HOME $HOME/android-sdk
-    set -gx ANDROID_SDK_ROOT $ANDROID_HOME
-    fish_add_path $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator $ANDROID_HOME/cmdline-tools/latest/bin
-end
-
+# Android SDK and the JDK Gradle runs on. ~/.bashrc sets the same values for
+# `bash -lc`, so both shells build the same way.
+#
 # Gradle and the Android Gradle Plugin want JAVA_HOME, not just java on PATH.
-# /usr/lib/jvm/default is Arch's alternatives symlink, so this follows JDK
-# upgrades and `archlinux-java set` instead of pinning a version. Inert on the
-# Mac, which has no working JDK on PATH.
-if test -d /usr/lib/jvm/default
+# On Arch, /usr/lib/jvm/default is the alternatives symlink, so it follows JDK
+# upgrades and `archlinux-java set`. On the Mac it is Homebrew's openjdk@17;
+# /usr/bin/java's stub honours JAVA_HOME.
+if test (uname) = Darwin
+    set -gx ANDROID_HOME $HOME/Library/Android/sdk
+    set -gx JAVA_HOME /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+else
+    set -gx ANDROID_HOME $HOME/android-sdk
     set -gx JAVA_HOME /usr/lib/jvm/default
 end
+set -gx ANDROID_SDK_ROOT $ANDROID_HOME
+fish_add_path $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator $ANDROID_HOME/cmdline-tools/latest/bin
 
 # PATH additions must precede the mise block below: mise itself lives in
 # ~/.local/bin (vendor installer, not a package), so `command -q mise` fails

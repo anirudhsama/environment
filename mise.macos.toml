@@ -70,6 +70,7 @@
 # mise.macos.toml.
 [dotfiles]
 "~/.gradle/gradle.properties" = { source = "home/.gradle/gradle.properties.macos", mode = "symlink" }
+"~/.androidrc" = { source = "home/.androidrc.macos", mode = "symlink" }
 
 # --- 6. LaunchAgents ---------------------------------------------------------
 # DevboxDrop stays hand-installed: it's WatchPaths driven and mise's launchd
