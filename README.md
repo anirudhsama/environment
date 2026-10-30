@@ -76,8 +76,9 @@ Every machine builds Android; only dev-mbp-14 runs devices.
 - **Paths.** `ANDROID_HOME`, `ANDROID_SDK_ROOT` and `JAVA_HOME` are set in both
   `.bashrc` (for `bash -lc`) and `config.fish`, and `~/.androidrc` (linked per
   platform) points Android CLI at the same SDK with metrics off.
-- **Android CLI** comes from mise. `bootstrap-common` runs `android init`. The
-  skill copy it writes under `~/.agents/skills` is gitignored.
+- **Android CLI** comes from mise. Bootstrap does not run `android init`: its
+  skill would be written untracked into every agent's skill folder. Add it
+  through the tracked skills instead if it's wanted.
 - **Simlock** comes from mise and runs as its own login service
   (`simlock daemon install`). `scripts/simlock-services` re-installs it when a
   Node or simlock upgrade breaks the saved paths. The gateway and worker roles
