@@ -100,7 +100,7 @@
 description = "OpenCode remote server"
 after = ["network-online.target"]
 type = "simple"
-exec_start = "%h/.local/bin/mise exec -- opencode serve --hostname 100.126.136.111 --port 4096"
+exec_start = "%h/.local/bin/mise exec -- opencode serve --service --hostname 100.126.136.111 --port 4096"
 restart = "always"
 restart_sec = "5"
 wanted_by = ["default.target"]

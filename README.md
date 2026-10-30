@@ -93,9 +93,12 @@ ships V1. All of them are declared in the tracked global mise config.
   it runs, launches never update in the foreground. `mise bootstrap services
   status` shows it; `mise doctor` shows the last failed update.
 - The devbox OpenCode server (`dev.mise.opencode.service`) listens on the
-  Tailscale address at port 4096. OpenCode 2 can't run without a password and
-  invents a new one on every start, so the unit reads a fixed one from
-  `serve.env`. Connect clients with username `opencode` and that password.
+  Tailscale address at port 4096 as the shared background service
+  (`serve --service`), so `opencode pair` and the apps' pairing codes work.
+  OpenCode 2 can't run without a password and invents a new one on first
+  start, so the unit copies a fixed one from `serve.env` into the service
+  config before each start. Manual clients use username `opencode` and that
+  password.
 - The DevboxDrop LaunchAgent stays a hand-written plist: it's `WatchPaths`
   driven and mise's launchd schema has no `WatchPaths`/`ThrottleInterval`.
 - Lean reference clones live in `~/code/references` (effect, opencode, t3code),
