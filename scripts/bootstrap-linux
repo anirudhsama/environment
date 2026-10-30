@@ -19,8 +19,9 @@ mkdir -p "$HOME/inbox" "$HOME/code/references"
 sudo loginctl enable-linger "$USER"
 
 # T3 Code owns its service lifecycle so updates can trial a new runtime and
-# roll back a failed handoff. Its systemd drop-in binds it to Devbox's stable
-# Tailscale address, reachable through MagicDNS as http://devbox:3773.
+# roll back a failed handoff. Its systemd drop-in binds it to loopback: the
+# T3 Connect tunnel always targets 127.0.0.1, and the tailnet reaches it
+# through Tailscale Serve below. `t3 connect` stays manual (browser sign-in).
 #
 # Install the service once. Server updates from the desktop app move the
 # running server but not the ~/.local/bin/t3 symlink, so re-running an older
@@ -31,6 +32,13 @@ if [[ ! -x "$HOME/.local/bin/t3" ]]; then
 fi
 if [[ -z "$(systemctl --user show -p FragmentPath --value t3code.service)" ]]; then
   "$HOME/.local/bin/t3" service install --base-dir "$HOME/.t3"
+fi
+# Tailnet-only HTTPS in front of the loopback server, once `tailscale up` has run.
+# `t3 pair --tailscale` reuses this mapping.
+# Funnel off first: a leftover Funnel on 443 would make this mapping public.
+if tailscale status >/dev/null 2>&1; then
+  tailscale funnel --https=443 off >/dev/null 2>&1 || true
+  tailscale serve --bg --https=443 http://127.0.0.1:3773
 fi
 
 # OpenCode 2 always requires a server password and generates a new one on

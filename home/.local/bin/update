@@ -40,3 +40,9 @@ fi
 if command -v herdr >/dev/null 2>&1; then
   herdr update --handoff || true
 fi
+
+# Unlike updates from a T3 client, this also rewrites the service unit to the
+# new launcher. Asks before restarting, since that interrupts agent turns.
+if command -v t3 >/dev/null 2>&1; then
+  t3 update || true
+fi
