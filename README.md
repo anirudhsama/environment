@@ -87,6 +87,8 @@ Every machine builds Android; only dev-mbp-14 runs devices.
   # devbox
   simlock --gateway daemon start
   for c in stream input agent-device; do simlock --gateway config set capabilities.$c.enabled true; done
+  simlock --gateway config set lease.maxPerRequester '{"ios":2,"android":2}'
+  simlock --gateway config set update.check false   # its npm lookup trips on mise's npm wrapper
   simlock --gateway token create --role worker --label dev-mbp-14
   simlock --gateway token create --role agent --label <t3-server>   # one per T3 server
   mise bootstrap                 # Tailscale Serve on :8443, systemd user unit
@@ -94,8 +96,16 @@ Every machine builds Android; only dev-mbp-14 runs devices.
   # dev-mbp-14 (stay logged in at the screen: the LaunchAgent needs a GUI session)
   simlock config set gateway '{"url":"wss://devbox.<tailnet>.ts.net:8443","token":"slk_…","label":"dev-mbp-14"}'
   for c in stream input agent-device; do simlock config set capabilities.$c.enabled true; done
+  # mise's .bin/agent-device is a wrapper script, which Simlock can't trace to its package.json
+  simlock config set capabilities.agent-device.command ~/.local/share/mise/installs/npm-agent-device/latest/node_modules/agent-device/bin/agent-device.mjs
+  # Two Android cold boots at once on the M1 Pro both miss the 180 s boot timeout
+  simlock config set warmPool.maxConcurrentBoots 1
+  simlock config set android.emulator.gpu host
+  simlock config set update.check false
   mise bootstrap                 # LaunchAgent
   ```
+
+  Token secrets live in `~/.config/simlock/tokens/<label>` on the devbox (mode 600).
 
   In T3: Settings → Labs → Simlock device hosts, then Settings → Devices → Add
   source → Simlock pool, with the gateway URL and that server's agent token.
