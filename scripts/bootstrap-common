@@ -24,7 +24,14 @@ fi
 # server without killing running agent sessions, which package installs can't.
 if ! command -v herdr >/dev/null 2>&1; then
   curl -fsSL https://herdr.dev/install.sh | sh
-  herdr integration install claude && herdr integration install codex || true
+fi
+
+# --- Rex agent skill and session-start hooks --------------------------------
+# Writes ~/.claude/skills/rex, ~/.agents/skills/rex (tracked), and hooks into
+# ~/.claude/settings.json (tracked) and ~/.codex/hooks.json. Idempotent. Rex
+# comes from pacman on Linux and the app on the Mac; skip until it's there.
+if command -v rex >/dev/null 2>&1; then
+  rex skill setup >/dev/null
 fi
 
 # --- keep mise the sole owner of the grok install ----------------------------

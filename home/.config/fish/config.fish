@@ -85,6 +85,18 @@ fish_add_path $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator $ANDROID_HOME/
 # and mise never activates if this runs after it.
 fish_add_path ~/.local/bin
 
+# Rex: pacman puts rex in /usr/bin on Linux; on the Mac it only ships inside
+# the app bundle. Same lookup in ~/.bashrc.
+if test (uname) = Darwin
+    for app in /Applications/Rex.app "/Applications/Rex Beta.app"
+        set -l rex_dir "$app/Contents/Helpers/Rex Server.rex/Contents/MacOS"
+        if test -x "$rex_dir/rex"
+            fish_add_path $rex_dir
+            break
+        end
+    end
+end
+
 # bun global installs (bun install -g -> ~/.bun/bin); node-version-independent
 fish_add_path ~/.bun/bin
 
@@ -112,6 +124,11 @@ if status is-interactive
     if command -q fnox
         fnox activate fish | source
     end
+end
+
+# Inside a Rex terminal, the server's own rex goes first so the CLI matches it.
+if set -q REX_BIN_DIR
+    fish_add_path --path --prepend --move $REX_BIN_DIR
 end
 
 # Machine-local config (secrets, host-specific overrides) — never committed.

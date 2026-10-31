@@ -1,14 +1,13 @@
 {
-  "model": "claude-fable-5-1",
+  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$HOME/.claude/hooks/herdr-agent-state.sh\" session",
-            "timeout": 10
+            "command": "/bin/sh -c 'rex __internal session-start --agent claude --feature-session-naming=false 2>/dev/null || true'",
+            "timeout": 5
           }
         ]
       }
@@ -25,6 +24,11 @@
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
   "agentPushNotifEnabled": true,
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
   "permissions": {
     "deny": [
       "WebSearch",

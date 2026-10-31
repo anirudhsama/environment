@@ -145,6 +145,12 @@ run as `ani`, and they survive restarts of the login server and package
 upgrades. Clients connect with the bare hostname (`rex -S devbox.<tailnet>.ts.net
 ls`, or Add Remote Host… on the Mac), because Rex tries 443 and then 7297.
 
+On the Mac, `rex` ships only inside the app bundle; `config.fish` and
+`.bashrc` put it on PATH. `bootstrap-common` runs `rex skill setup` on both
+machines: the Rex skill for Claude Code, Codex, OpenCode, and Pi, plus
+session-start hooks for Claude Code and Codex (Codex asks you to approve its
+hook once, with `/hooks`). Agents started outside Rex still get the skill.
+
 `/etc/rex/accounts.jsonc` is filled once from this machine's Tailscale login
 and left alone after that. Run `sudo systemctl reload rex-login-server` after
 you edit it.
