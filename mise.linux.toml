@@ -107,14 +107,15 @@ restart_sec = "5"
 wanted_by = ["default.target"]
 
 # Simlock gateway for the device pool (see README). Runs the `latest` simlock,
-# so a pin bump needs no unit change, only a restart. Logs go where
-# `simlock --gateway daemon logs` reads them. Simlock's own unit also sets
-# KillMode=process, which matters only to a worker that owns devices.
+# so a pin bump needs no unit change, only a restart. main.js only starts when
+# argv[1] is its real path, hence the realpath through the install symlinks.
+# Logs go where `simlock --gateway daemon logs` reads them. Simlock's own unit
+# also sets KillMode=process, which matters only to a worker that owns devices.
 [bootstrap.linux.systemd.units.simlock-gateway]
 description = "Simlock gateway"
 after = ["network-online.target"]
 type = "simple"
-exec_start = "%h/.local/bin/mise exec -- node %h/.local/share/mise/installs/npm-simlock/latest/node_modules/simlock/dist/daemon/main.js --gateway"
+exec_start = """/bin/sh -c 'exec %h/.local/bin/mise exec -- node "$$(realpath %h/.local/share/mise/installs/npm-simlock/latest/node_modules/simlock/dist/daemon/main.js)" --gateway'"""
 environment = { SIMLOCK_HOME = "%h/.simlock" }
 restart = "on-failure"
 restart_sec = "10"

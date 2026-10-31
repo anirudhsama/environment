@@ -4,17 +4,18 @@
 #   env = ["simlock-worker"]
 #
 # Runs the `latest` simlock through `mise exec`, so a pin bump needs no unit
-# change, only a restart (see README). The daemon spawns simctl, adb, the
-# emulator and agent-device, so PATH and the Android/JDK variables mirror
-# .bashrc; mise exec prepends the tool paths.
+# change, only a restart (see README). main.js only starts when argv[1] is its
+# real path, hence the realpath through the install symlinks. The daemon
+# spawns simctl, adb, the emulator and agent-device, so PATH and the
+# Android/JDK variables mirror .bashrc; mise exec prepends the tool paths.
 #
 # Simlock's own LaunchAgent also sets ExitTimeOut=300 and AbandonProcessGroup.
 # mise's schema has neither: launchd stops the daemon after 20 s, and a device
 # reset cut short is repaired on the next start. Emulators survive a stop
 # anyway, since Simlock detaches them into their own process group.
 [bootstrap.macos.launchd.agents.simlock-worker]
-program = "~/.local/bin/mise"
-args = ["exec", "--", "node", "{{ env.HOME }}/.local/share/mise/installs/npm-simlock/latest/node_modules/simlock/dist/daemon/main.js"]
+program = "/bin/sh"
+args = ["-c", 'exec "$HOME/.local/bin/mise" exec -- node "$(realpath "$HOME/.local/share/mise/installs/npm-simlock/latest/node_modules/simlock/dist/daemon/main.js")"']
 run_at_load = true
 keep_alive_on_failure = true
 throttle_interval = 10
