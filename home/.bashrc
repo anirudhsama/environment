@@ -2,7 +2,8 @@
 export PATH="$HOME/.local/bin:$PATH"
 
 # Android SDK and the JDK Gradle runs on. Set here, not only in fish, because
-# agents run commands through `bash -lc`. config.fish sets the same values.
+# agents run commands through `bash -lc`. The same paths are in config.fish,
+# home/.androidrc.{macos,linux} and mise.simlock-worker.toml; change all four.
 case "$(uname)" in
     Darwin)
         export ANDROID_HOME="$HOME/Library/Android/sdk"

@@ -61,7 +61,8 @@ alias yolo="claude --dangerously-skip-permissions"
 alias yolox="codex -c model_reasoning_effort=high --dangerously-bypass-approvals-and-sandbox -c model_reasoning_summary=detailed -c model_supports_reasoning_summaries=true"
 
 # Android SDK and the JDK Gradle runs on. ~/.bashrc sets the same values for
-# `bash -lc`, so both shells build the same way.
+# `bash -lc`, so both shells build the same way. The paths are also in
+# home/.androidrc.{macos,linux} and mise.simlock-worker.toml; change all four.
 #
 # Gradle and the Android Gradle Plugin want JAVA_HOME, not just java on PATH.
 # On Arch, /usr/lib/jvm/default is the alternatives symlink, so it follows JDK

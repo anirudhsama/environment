@@ -7,7 +7,8 @@
 # change, only a restart (see README). main.js only starts when argv[1] is its
 # real path, hence the realpath through the install symlinks. The daemon
 # spawns simctl, adb, the emulator and agent-device, so PATH and the
-# Android/JDK variables mirror .bashrc; mise exec prepends the tool paths.
+# Android/JDK variables mirror home/.bashrc (launchd reads no shell files);
+# mise exec prepends the tool paths.
 #
 # Simlock's own LaunchAgent also sets ExitTimeOut=300 and AbandonProcessGroup.
 # mise's schema has neither: launchd stops the daemon after 20 s, and a device
