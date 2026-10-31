@@ -76,7 +76,9 @@ else
     set -gx JAVA_HOME /usr/lib/jvm/default
 end
 set -gx ANDROID_SDK_ROOT $ANDROID_HOME
-fish_add_path $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator $ANDROID_HOME/cmdline-tools/latest/bin
+# The JDK goes on PATH too: GUI apps such as T3 import PATH but not JAVA_HOME
+# from the login shell, and avdmanager falls back to java on PATH.
+fish_add_path $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator $ANDROID_HOME/cmdline-tools/latest/bin $JAVA_HOME/bin
 
 # PATH additions must precede the mise block below: mise itself lives in
 # ~/.local/bin (vendor installer, not a package), so `command -q mise` fails

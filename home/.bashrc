@@ -15,7 +15,8 @@ case "$(uname)" in
         ;;
 esac
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
-export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+# JDK on PATH for tools that ignore JAVA_HOME; see config.fish.
+export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$JAVA_HOME/bin:$PATH"
 
 # Local additions run before mise so noninteractive commands prefer its shims.
 [[ -f ~/.bashrc.local ]] && . ~/.bashrc.local

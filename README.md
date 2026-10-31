@@ -94,8 +94,11 @@ Every machine builds Android; only dev-mbp-14 runs devices.
   for c in stream input agent-device; do simlock --gateway config set capabilities.$c.enabled true; done
   simlock --gateway config set lease.maxPerRequester '{"ios":2,"android":2}'
   simlock --gateway config set update.check false   # its npm lookup trips on mise's npm wrapper
-  simlock --gateway token create --role worker --label dev-mbp-14
-  simlock --gateway token create --role agent --label <t3-server>   # one per T3 server
+  # The secret is printed once; the gateway keeps only its id and label.
+  mkdir -p ~/.config/simlock/tokens
+  token() { (umask 077; simlock --gateway token create --role "$1" --label "$2" | jq -r .secret > ~/.config/simlock/tokens/"$2"); }
+  token worker dev-mbp-14
+  for t3 in t3-m5 t3-devbox t3-dev-mbp-14; do token agent "$t3"; done   # one per T3 server
   systemctl --user restart dev.mise.simlock-gateway
 
   # dev-mbp-14 (stay logged in at the screen: the LaunchAgent needs a GUI session)
@@ -119,7 +122,15 @@ Every machine builds Android; only dev-mbp-14 runs devices.
   `latest` install, so nothing restarts them on its own. A restart ends
   running leases.
 
-  Token secrets live in `~/.config/simlock/tokens/<label>` on the devbox (mode 600).
+  Token secrets live only in `~/.config/simlock/tokens/<label>` on the devbox
+  and where they are used: the worker's `~/.simlock/config.json` and each T3
+  server's settings. A lost or leaked token is replaced, not recovered:
+  `simlock --gateway token list`, `token revoke <id>`, then create a new one.
+
+  If the worker logs `Skipped Android driver: adb server unavailable`,
+  something else holds Simlock's adb port (5038), often an adb server that
+  surviving emulators restarted. Stop that listener and any leftover
+  `qemu-system` emulators, then restart the worker.
 
   In T3: Settings → Labs → Simlock device hosts, then Settings → Devices → Add
   source → Simlock pool, with the gateway URL and that server's agent token.
