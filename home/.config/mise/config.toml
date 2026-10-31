@@ -37,8 +37,8 @@ android-cli = { version = "latest", auto_update = true }
 # Simlock device pool: the gateway runs on the devbox, the worker on
 # dev-mbp-14. Upgraded deliberately, not by auto_update: the gateway and
 # workers must stay protocol-compatible, and T3's Simlock source needs a
-# recent enough version. scripts/simlock-services re-installs the service
-# after an upgrade moves Node or simlock. Low npm download counts trip
+# recent enough version. The services run `latest`, so after a bump restart
+# both (see README). Low npm download counts trip
 # mise's supply-chain check; the package is Callstack's, published from
 # callstackincubator/simlock.
 "npm:simlock" = { version = "0.4.0", allow_low_downloads = true }

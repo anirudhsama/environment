@@ -106,6 +106,23 @@ restart = "always"
 restart_sec = "5"
 wanted_by = ["default.target"]
 
+# Simlock gateway for the device pool (see README). Runs the `latest` simlock,
+# so a pin bump needs no unit change, only a restart. Logs go where
+# `simlock --gateway daemon logs` reads them. Simlock's own unit also sets
+# KillMode=process, which matters only to a worker that owns devices.
+[bootstrap.linux.systemd.units.simlock-gateway]
+description = "Simlock gateway"
+after = ["network-online.target"]
+type = "simple"
+exec_start = "%h/.local/bin/mise exec -- node %h/.local/share/mise/installs/npm-simlock/latest/node_modules/simlock/dist/daemon/main.js --gateway"
+environment = { SIMLOCK_HOME = "%h/.simlock" }
+restart = "on-failure"
+restart_sec = "10"
+timeout_stop_sec = "300"
+standard_output = "append:%h/.simlock/gateway/daemon.log"
+standard_error = "append:%h/.simlock/gateway/daemon.log"
+wanted_by = ["default.target"]
+
 # No mise exec: this spawns nothing, so it would be pure overhead.
 [bootstrap.linux.systemd.units.taildrop-inbox]
 description = "Drain Taildrop files into ~/inbox"

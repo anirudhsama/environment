@@ -1,0 +1,29 @@
+# Simlock worker: lends this Mac's iOS simulators and Android emulators to the
+# gateway on the devbox. A machine module, so only the device host runs it:
+# dev-mbp-14 selects it in ~/.config/mise/miserc.local.toml with
+#   env = ["simlock-worker"]
+#
+# Runs the `latest` simlock through `mise exec`, so a pin bump needs no unit
+# change, only a restart (see README). The daemon spawns simctl, adb, the
+# emulator and agent-device, so PATH and the Android/JDK variables mirror
+# .bashrc; mise exec prepends the tool paths.
+#
+# Simlock's own LaunchAgent also sets ExitTimeOut=300 and AbandonProcessGroup.
+# mise's schema has neither: launchd stops the daemon after 20 s, and a device
+# reset cut short is repaired on the next start. Emulators survive a stop
+# anyway, since Simlock detaches them into their own process group.
+[bootstrap.macos.launchd.agents.simlock-worker]
+program = "~/.local/bin/mise"
+args = ["exec", "--", "node", "{{ env.HOME }}/.local/share/mise/installs/npm-simlock/latest/node_modules/simlock/dist/daemon/main.js"]
+run_at_load = true
+keep_alive_on_failure = true
+throttle_interval = 10
+stdout_path = "~/.simlock/daemon.log"
+stderr_path = "~/.simlock/daemon.log"
+
+[bootstrap.macos.launchd.agents.simlock-worker.environment]
+SIMLOCK_HOME = "{{ env.HOME }}/.simlock"
+ANDROID_HOME = "{{ env.HOME }}/Library/Android/sdk"
+ANDROID_SDK_ROOT = "{{ env.HOME }}/Library/Android/sdk"
+JAVA_HOME = "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+PATH = "{{ env.HOME }}/Library/Android/sdk/platform-tools:{{ env.HOME }}/Library/Android/sdk/emulator:{{ env.HOME }}/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"

@@ -79,22 +79,27 @@ Every machine builds Android; only dev-mbp-14 runs devices.
 - **Android CLI** comes from mise. Bootstrap does not run `android init`: its
   skill would be written untracked into every agent's skill folder. Add it
   through the tracked skills instead if it's wanted.
-- **Simlock** comes from mise and runs as its own login service
-  (`simlock daemon install`). `scripts/simlock-services` re-installs it when a
-  Node or simlock upgrade breaks the saved paths. The gateway and worker roles
-  are set up by hand once, because join tokens are secrets:
+- **Simlock** comes from mise, and mise runs it: the gateway as the
+  `dev.mise.simlock-gateway` systemd unit (`mise.linux.toml`), the worker as
+  the `dev.mise.simlock-worker` LaunchAgent from the `simlock-worker` machine
+  module (`mise.simlock-worker.toml`), which only dev-mbp-14 selects. Manage
+  them with `systemctl --user` / `launchctl`, not `simlock daemon
+  start|stop|install`: those start a second, unmanaged daemon or install
+  Simlock's own unit beside mise's. The roles are configured by hand once,
+  because join tokens are secrets:
 
   ```sh
   # devbox
-  simlock --gateway daemon start
+  mise bootstrap                 # gateway unit, Tailscale Serve on :8443
   for c in stream input agent-device; do simlock --gateway config set capabilities.$c.enabled true; done
   simlock --gateway config set lease.maxPerRequester '{"ios":2,"android":2}'
   simlock --gateway config set update.check false   # its npm lookup trips on mise's npm wrapper
   simlock --gateway token create --role worker --label dev-mbp-14
   simlock --gateway token create --role agent --label <t3-server>   # one per T3 server
-  mise bootstrap                 # Tailscale Serve on :8443, systemd user unit
+  systemctl --user restart dev.mise.simlock-gateway
 
   # dev-mbp-14 (stay logged in at the screen: the LaunchAgent needs a GUI session)
+  echo 'env = ["simlock-worker"]' >> ~/.config/mise/miserc.local.toml
   simlock config set gateway '{"url":"wss://devbox.<tailnet>.ts.net:8443","token":"slk_…","label":"dev-mbp-14"}'
   for c in stream input agent-device; do simlock config set capabilities.$c.enabled true; done
   # mise's .bin/agent-device is a wrapper script, which Simlock can't trace to its package.json
@@ -105,6 +110,14 @@ Every machine builds Android; only dev-mbp-14 runs devices.
   simlock config set update.check false
   mise bootstrap                 # LaunchAgent
   ```
+
+  **Upgrading.** The gateway and worker must run the same protocol, so bump
+  `npm:simlock` in the global mise config, then on both machines run
+  `mise bootstrap` and restart the daemon: `systemctl --user restart
+  dev.mise.simlock-gateway` on the devbox, `launchctl kickstart -k
+  gui/$(id -u)/dev.mise.simlock-worker` on dev-mbp-14. The units run the
+  `latest` install, so nothing restarts them on its own. A restart ends
+  running leases.
 
   Token secrets live in `~/.config/simlock/tokens/<label>` on the devbox (mode 600).
 
@@ -122,6 +135,7 @@ Every machine builds Android; only dev-mbp-14 runs devices.
 | `~/.codex/auth.json`, `~/.local/share/atuin/key` | credentials — back up via 1Password, not git |
 | `~/.config/opencode/serve.env` | devbox OpenCode server password; `bootstrap-linux` generates it if missing |
 | `~/.simlock/` | Simlock state, config and tokens; the worker's join token sits in `config.json` |
+| `~/.config/mise/miserc.local.toml` | this machine's mise modules (`env = ["simlock-worker"]` on dev-mbp-14) |
 
 ## Notes
 

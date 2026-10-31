@@ -50,7 +50,4 @@ fi
 # subprocess picks up the newly-linked global [tools].
 mise install
 
-# --- Simlock services (gateway on the devbox, worker on dev-mbp-14) ----------
-scripts/simlock-services
-
 echo "bootstrap: common steps done."
