@@ -49,15 +49,78 @@ mv -f "$t3_wrapper" "$HOME/.local/bin/t3"
 if [[ -z "$(systemctl --user show -p FragmentPath --value t3code.service)" ]]; then
   "$HOME/.local/bin/t3" service install --base-dir "$HOME/.t3"
 fi
+
+# Rex, from Superlogical's pacman repo (preview channel). Not in
+# [bootstrap.packages]: packages install before this task adds the repo. Only
+# the first install happens here; `update`'s pacman -Syu upgrades it after that.
+rex_key=E28636AC71905C6DDE40C1EDFAA6B80F641307A7
+if ! sudo pacman-key --list-keys "$rex_key" >/dev/null 2>&1; then
+  rex_asc="$(mktemp)"
+  curl -fsSL -o "$rex_asc" https://pkgs.superlogical.com/rex/keys/rex.asc
+  sudo pacman-key --add "$rex_asc"
+  sudo pacman-key --lsign-key "$rex_key"
+  rm -f "$rex_asc"
+fi
+# shellcheck disable=SC2016 # $arch is pacman's, not ours
+printf '[rex]\nSigLevel = Required DatabaseRequired\nServer = https://pkgs.superlogical.com/rex/arch/preview/$arch\n' |
+  sudo install -m 0644 /dev/stdin /etc/pacman.d/rex.conf
+grep -qxF 'Include = /etc/pacman.d/rex.conf' /etc/pacman.conf ||
+  echo 'Include = /etc/pacman.d/rex.conf' | sudo tee -a /etc/pacman.conf >/dev/null
+# Arch has no partial upgrades, so installing Rex upgrades the system too.
+pacman -Q rex >/dev/null 2>&1 || sudo pacman -Syu --needed --noconfirm rex
+
+# The login server runs each caller's sessions as their own account, and only
+# it and the shared server (as a `rex` account) can sit behind Tailscale Serve.
+# Serve forwards :7297 to this socket below; clients try 443, then 7297, so
+# the bare devbox hostname finds it. Restarting the login server keeps sessions.
+rex_restart=0
+rex_dropin="$(mktemp)"
+cat >"$rex_dropin" <<'UNIT'
+# Managed by scripts/bootstrap-linux.
+[Unit]
+After=tailscaled.service
+Requires=tailscaled.service
+
+[Service]
+ExecStart=
+ExecStart=/usr/bin/rex login-server --listen unix:///run/rex/login-server.sock \
+  --accounts /etc/rex/accounts.jsonc --runtime-root /run/rex --log-format text \
+  --pam-service rex-login-server --extra-listen tailnet-serve:///run/rex/serve.sock
+UNIT
+rex_dropin_path=/etc/systemd/system/rex-login-server.service.d/tailscale-serve.conf
+if ! sudo cmp -s "$rex_dropin" "$rex_dropin_path"; then
+  sudo install -D -m 0644 "$rex_dropin" "$rex_dropin_path"
+  sudo systemctl daemon-reload
+  rex_restart=1
+fi
+rm -f "$rex_dropin"
+# The package ships an accounts file that admits nobody. Fill it once with this
+# account's Tailscale login, read at run time to keep it out of this public
+# repo; after that, hand edits win.
+if grep -qxF '  "accounts": {},' /etc/rex/accounts.jsonc && tailscale status >/dev/null 2>&1; then
+  rex_login="$(tailscale status --json | jq -r '.User[(.Self.UserID | tostring)].LoginName')"
+  printf '// Written by scripts/bootstrap-linux, which leaves it alone from now on.\n{\n  "version": 1,\n  "accounts": {\n    "%s": { "principals": ["tailscale:%s"] },\n  },\n}\n' \
+    "$USER" "$rex_login" | sudo install -m 0644 /dev/stdin /etc/rex/accounts.jsonc
+  rex_restart=1
+fi
+sudo systemctl enable rex-login-server.service
+if ((rex_restart)); then
+  sudo systemctl restart rex-login-server.service
+else
+  sudo systemctl start rex-login-server.service
+fi
 # Tailnet-only HTTPS in front of the loopback server, once `tailscale up` has run.
 # `t3 pair --tailscale` reuses this mapping.
 # Funnel off first: a leftover Funnel on 443 would make this mapping public.
 if tailscale status >/dev/null 2>&1; then
-  tailscale funnel --https=443 off >/dev/null 2>&1 || true
-  tailscale serve --bg --https=443 http://127.0.0.1:3773
+  sudo tailscale funnel --https=443 off >/dev/null 2>&1 || true
+  sudo tailscale serve --bg --https=443 http://127.0.0.1:3773
   # Simlock gateway. Workers dial wss://devbox.<tailnet>.ts.net:8443; agents
   # and T3 use https:// there.
-  tailscale serve --bg --https=8443 http://127.0.0.1:4700
+  sudo tailscale serve --bg --https=8443 http://127.0.0.1:4700
+  # Rex login server (see above). Once the serve config holds a Unix socket,
+  # every `tailscale serve` change needs root, hence sudo on all of these.
+  sudo tailscale serve --bg --https=7297 unix:/run/rex/serve.sock
 fi
 
 # OpenCode 2 always requires a server password and generates a new one on

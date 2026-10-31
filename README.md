@@ -135,6 +135,20 @@ Every machine builds Android; only dev-mbp-14 runs devices.
   In T3: Settings → Labs → Simlock device hosts, then Settings → Devices → Add
   source → Simlock pool, with the gateway URL and that server's agent token.
 
+## Rex
+
+The devbox runs [Rex](https://www.superlogical.com/rex/docs/linux/installation)
+from Superlogical's pacman repo, preview channel. `bootstrap-linux` adds the
+repo and its key, installs `rex` once (`update` upgrades it with the system),
+and runs `rex-login-server.service` behind Tailscale Serve on `:7297`. Sessions
+run as `ani`, and they survive restarts of the login server and package
+upgrades. Clients connect with the bare hostname (`rex -S devbox.<tailnet>.ts.net
+ls`, or Add Remote Host… on the Mac), because Rex tries 443 and then 7297.
+
+`/etc/rex/accounts.jsonc` is filled once from this machine's Tailscale login
+and left alone after that. Run `sudo systemctl reload rex-login-server` after
+you edit it.
+
 ## Machine-local files (never committed)
 
 | File | Holds |
@@ -145,6 +159,7 @@ Every machine builds Android; only dev-mbp-14 runs devices.
 | `~/.codex/config.toml` | Codex rewrites this at runtime; seed from `home/.codex/config.toml.example` |
 | `~/.codex/auth.json`, `~/.local/share/atuin/key` | credentials — back up via 1Password, not git |
 | `~/.config/opencode/serve.env` | devbox OpenCode server password; `bootstrap-linux` generates it if missing |
+| `/etc/rex/accounts.jsonc` | who may use the devbox Rex login server; `bootstrap-linux` fills it once from the Tailscale login |
 | `~/.simlock/` | Simlock state, config and tokens; the worker's join token sits in `config.json` |
 | `~/.config/mise/miserc.local.toml` | this machine's mise modules (`env = ["simlock-worker"]` on dev-mbp-14) |
 
