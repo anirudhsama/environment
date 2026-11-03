@@ -41,7 +41,7 @@ android-cli = { version = "latest", auto_update = true }
 # both (see README). Low npm download counts trip
 # mise's supply-chain check; the package is Callstack's, published from
 # callstackincubator/simlock.
-"npm:simlock" = { version = "0.4.0", allow_low_downloads = true }
+"npm:simlock" = { version = "0.5.0", allow_low_downloads = true }
 # The worker's agent-device must be the version T3 pins in
 # apps/server/src/device/deviceToolVersions.json.
 "npm:agent-device" = "0.21.31"
