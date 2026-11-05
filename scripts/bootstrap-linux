@@ -147,6 +147,12 @@ if ! grep -q 'modprobe.blacklist=qxl' /etc/default/grub; then
   sudo grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
+# Keep /tmp on disk. systemd's default tmp.mount is a tmpfs capped at half of
+# RAM, and with zram swap even swapped-out pages stay in RAM. Agents leave
+# builds, clones and node_modules there. Arch's stock tmpfiles rule removes
+# anything older than 10 days. Takes effect on the next reboot.
+sudo systemctl mask tmp.mount
+
 # Gradle memory ceilings are a tracked dotfile now — see [dotfiles] in
 # mise.linux.toml, which links home/.gradle/gradle.properties.linux.
 
