@@ -32,9 +32,11 @@ done
 mise bootstrap
 ```
 
-Keep machine-specific Bash additions in `~/.bashrc.local`. Both platforms load
-mise shims for `bash -lc`; interactive Bash uses full mise activation. Fish
-also uses shims for noninteractive commands, including macOS SSH sessions.
+Keep machine-specific Bash additions in `~/.bashrc.local`. Bash always loads
+mise shims. Fish activates mise only in a terminal (interactive with a TTY) and
+uses shims otherwise, including macOS SSH sessions. T3 Code reads PATH from an
+interactive login shell without a TTY and keeps it, so it gets shims, which
+survive `mise upgrade`; that is what lets its Update run `mise upgrade`.
 Child processes inherit PATH. An independently launched `bash -c` with a bare
 environment reads neither Bash file; use `bash -lc` or `mise exec --` there.
 

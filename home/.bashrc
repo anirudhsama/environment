@@ -34,12 +34,11 @@ fi
 # Local additions run before mise so noninteractive commands prefer its shims.
 [[ -f ~/.bashrc.local ]] && . ~/.bashrc.local
 
+# Shims always: terminals run fish, so Bash here serves `bash -lc` and the
+# `bash -ilc` T3 Code reads PATH from. T3 keeps that PATH, and only shim paths
+# survive a `mise upgrade`; activation would hand it version directories.
 if command -v mise >/dev/null 2>&1; then
-    if [[ $- == *i* ]]; then
-        eval "$(mise activate bash)"
-    else
-        eval "$(mise activate bash --shims)"
-    fi
+    eval "$(mise activate bash --shims)"
 fi
 
 # Inside a Rex terminal, the server's own rex goes first so the CLI matches it.

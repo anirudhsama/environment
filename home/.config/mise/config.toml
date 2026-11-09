@@ -50,14 +50,13 @@ android-cli = { version = "latest", auto_update = true }
 # is explicit because that is Omarchy's package choice and xAI's published CLI.
 claude = { version = "latest", auto_update = true }
 codex = { version = "latest", auto_update = true }
-# OpenCode 2 ships on npm; the bare `opencode` alias follows the V1-only aqua
-# backend. mise skips install scripts, so run the postinstall that selects the
-# native binary.
-"npm:@opencode/cli" = { version = "latest", auto_update = true, postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@opencode/cli/postinstall.mjs"' }
-# xAI's npm package keeps the native binary under ~/.grok/bin. Re-run its
-# postinstall from the mise install so that symlink follows the mise version.
-"npm:@xai-official/grok" = { version = "latest", auto_update = true, postinstall = 'node "$MISE_TOOL_INSTALL_PATH/node_modules/@xai-official/grok/bin/postinstall.js"' }
-"npm:@earendil-works/pi-coding-agent" = { version = "latest", auto_update = true }
+# Bare registry names, as Omarchy declares them: T3 Code's Update runs
+# `mise upgrade <name>` only for these names. `opencode` is npm:@opencode/cli,
+# whose registry entry allows its native-binary install script; `grok` and `pi`
+# are native release binaries (http:grok, aqua:earendil-works/pi).
+opencode = { version = "latest", auto_update = true }
+grok = { version = "latest", auto_update = true }
+pi = { version = "latest", auto_update = true }
 
 [settings]
 experimental = true
@@ -65,9 +64,9 @@ idiomatic_version_file_enable_tools = ["python"]
 minimum_release_age_excludes = [
   "claude",
   "codex",
-  "npm:@opencode/cli",
-  "npm:@xai-official/grok",
-  "npm:@earendil-works/pi-coding-agent",
+  "opencode",
+  "grok",
+  "pi",
 ]
 trusted_config_paths = [
   "/Users/ani/conductor/workspaces",

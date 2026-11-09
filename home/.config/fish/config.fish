@@ -101,8 +101,11 @@ end
 fish_add_path ~/.bun/bin
 
 # mise (dev runtimes: node, bun, fnox, ...)
+# Only a terminal gets activation. On the Mac fish is the login shell, and T3
+# Code reads PATH from `fish -ilc` without a TTY and keeps it, so that probe
+# needs shims, which survive a `mise upgrade`.
 if command -q mise
-    if status is-interactive
+    if status is-interactive; and isatty stdin
         mise activate fish | source
     else
         mise activate fish --shims | source
