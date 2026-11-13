@@ -142,20 +142,24 @@ Every machine builds Android; only dev-mbp-14 runs devices.
 The devbox runs [Rex](https://www.superlogical.com/rex/docs/linux/installation)
 from Superlogical's pacman repo, preview channel. `bootstrap-linux` adds the
 repo and its key, installs `rex` once (`update` upgrades it with the system),
-and runs `rex-login-server.service` behind Tailscale Serve on `:7297`. Sessions
-run as `ani`, and they survive restarts of the login server and package
-upgrades. Clients connect with the bare hostname (`rex -S devbox.<tailnet>.ts.net
-ls`, or Add Remote Host… on the Mac), because Rex tries 443 and then 7297.
+and runs `rex server install`, which enables the package's `rex.socket` user
+unit. With linger on, the personal server starts at boot or on first use and
+keeps running while logged out. Package upgrades don't restart it; it picks up
+a new version at the next reboot or `systemctl --user restart rex.service`.
+
+Clients connect over SSH: `ssh://ani@devbox` on the Mac (Add Remote Host…, or
+`rex -S ssh://ani@devbox ls`) and `ssh://ani@devbox.<tailnet>.ts.net` on
+iPhone/iPad, whose own SSH client doesn't read `~/.ssh/config`. Tailscale SSH
+answers port 22 on the tailnet, so access follows the tailnet SSH policy, not
+`authorized_keys`; that policy should `accept` your own devices, because a
+`check` re-auth prompt stalls Rex reconnects. dev-mbp-14 is reached through its
+Rex app's built-in Tailscale instead.
 
 On the Mac, `rex` ships only inside the app bundle; `config.fish` and
 `.bashrc` put it on PATH. `bootstrap-common` runs `rex skill setup` on both
 machines: the Rex skill for Claude Code, Codex, OpenCode, and Pi, plus
 session-start hooks for Claude Code and Codex (Codex asks you to approve its
 hook once, with `/hooks`). Agents started outside Rex still get the skill.
-
-`/etc/rex/accounts.jsonc` is filled once from this machine's Tailscale login
-and left alone after that. Run `sudo systemctl reload rex-login-server` after
-you edit it.
 
 ## Machine-local files (never committed)
 
@@ -167,7 +171,6 @@ you edit it.
 | `~/.codex/config.toml` | Codex rewrites this at runtime; seed from `home/.codex/config.toml.example` |
 | `~/.codex/auth.json`, `~/.local/share/atuin/key` | credentials — back up via 1Password, not git |
 | `~/.config/opencode/serve.env` | devbox OpenCode server password; `bootstrap-linux` generates it if missing |
-| `/etc/rex/accounts.jsonc` | who may use the devbox Rex login server; `bootstrap-linux` fills it once from the Tailscale login |
 | `~/.simlock/` | Simlock state, config and tokens; the worker's join token sits in `config.json` |
 | `~/.config/mise/miserc.local.toml` | this machine's mise modules (`env = ["simlock-worker"]` on dev-mbp-14) |
 

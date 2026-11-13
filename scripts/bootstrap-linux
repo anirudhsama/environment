@@ -69,45 +69,21 @@ grep -qxF 'Include = /etc/pacman.d/rex.conf' /etc/pacman.conf ||
 # Arch has no partial upgrades, so installing Rex upgrades the system too.
 pacman -Q rex >/dev/null 2>&1 || sudo pacman -Syu --needed --noconfirm rex
 
-# The login server runs each caller's sessions as their own account, and only
-# it and the shared server (as a `rex` account) can sit behind Tailscale Serve.
-# Serve forwards :7297 to this socket below; clients try 443, then 7297, so
-# the bare devbox hostname finds it. Restarting the login server keeps sessions.
-rex_restart=0
-rex_dropin="$(mktemp)"
-cat >"$rex_dropin" <<'UNIT'
-# Managed by scripts/bootstrap-linux.
-[Unit]
-After=tailscaled.service
-Requires=tailscaled.service
-
-[Service]
-ExecStart=
-ExecStart=/usr/bin/rex login-server --listen unix:///run/rex/login-server.sock \
-  --accounts /etc/rex/accounts.jsonc --runtime-root /run/rex --log-format text \
-  --pam-service rex-login-server --extra-listen tailnet-serve:///run/rex/serve.sock
-UNIT
-rex_dropin_path=/etc/systemd/system/rex-login-server.service.d/tailscale-serve.conf
-if ! sudo cmp -s "$rex_dropin" "$rex_dropin_path"; then
-  sudo install -D -m 0644 "$rex_dropin" "$rex_dropin_path"
+# Clients reach Rex over SSH (ssh://ani@devbox): each connection runs `rex` on
+# this box, which talks to the personal server on its local socket. `rex server
+# install` enables the package's rex.socket user unit, which starts the server
+# on first use; linger (above) keeps it up across logout and starts the user
+# manager at boot. Idempotent, no sudo.
+rex server install >/dev/null
+# Retire the login server behind Tailscale Serve :7297 that this box used to
+# run. The drop-in only exists on boxes that still have it. Its account server
+# is the personal server above, so sessions survive.
+rex_dropin_dir=/etc/systemd/system/rex-login-server.service.d
+if [[ -e "$rex_dropin_dir" ]]; then
+  sudo systemctl disable --now rex-login-server.service rex-login-server.socket
+  sudo rm -rf "$rex_dropin_dir"
   sudo systemctl daemon-reload
-  rex_restart=1
-fi
-rm -f "$rex_dropin"
-# The package ships an accounts file that admits nobody. Fill it once with this
-# account's Tailscale login, read at run time to keep it out of this public
-# repo; after that, hand edits win.
-if grep -qxF '  "accounts": {},' /etc/rex/accounts.jsonc && tailscale status >/dev/null 2>&1; then
-  rex_login="$(tailscale status --json | jq -r '.User[(.Self.UserID | tostring)].LoginName')"
-  printf '// Written by scripts/bootstrap-linux, which leaves it alone from now on.\n{\n  "version": 1,\n  "accounts": {\n    "%s": { "principals": ["tailscale:%s"] },\n  },\n}\n' \
-    "$USER" "$rex_login" | sudo install -m 0644 /dev/stdin /etc/rex/accounts.jsonc
-  rex_restart=1
-fi
-sudo systemctl enable rex-login-server.service
-if ((rex_restart)); then
-  sudo systemctl restart rex-login-server.service
-else
-  sudo systemctl start rex-login-server.service
+  sudo tailscale serve --https=7297 off || true
 fi
 # Tailnet-only HTTPS in front of the loopback server, once `tailscale up` has run.
 # `t3 pair --tailscale` reuses this mapping.
@@ -118,9 +94,6 @@ if tailscale status >/dev/null 2>&1; then
   # Simlock gateway. Workers dial wss://devbox.<tailnet>.ts.net:8443; agents
   # and T3 use https:// there.
   sudo tailscale serve --bg --https=8443 http://127.0.0.1:4700
-  # Rex login server (see above). Once the serve config holds a Unix socket,
-  # every `tailscale serve` change needs root, hence sudo on all of these.
-  sudo tailscale serve --bg --https=7297 unix:/run/rex/serve.sock
 fi
 
 # OpenCode 2 always requires a server password and generates a new one on
