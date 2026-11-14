@@ -87,15 +87,12 @@ Every machine builds Android; only dev-mbp-14 runs devices.
   module (`mise.simlock-worker.toml`), which only dev-mbp-14 selects. Manage
   them with `systemctl --user` / `launchctl`, not `simlock daemon
   start|stop|install`: those start a second, unmanaged daemon or install
-  Simlock's own unit beside mise's. The roles are configured by hand once,
-  because join tokens are secrets:
+  Simlock's own unit beside mise's. Settings are tracked; join tokens are
+  secrets, so they are created and placed by hand once:
 
   ```sh
   # devbox
-  mise bootstrap                 # gateway unit, Tailscale Serve on :8443
-  for c in stream input agent-device; do simlock --gateway config set capabilities.$c.enabled true; done
-  simlock --gateway config set lease.maxPerRequester '{"ios":2,"android":2}'
-  simlock --gateway config set update.check false   # its npm lookup trips on mise's npm wrapper
+  mise bootstrap                 # gateway unit and settings, Tailscale Serve on :8443
   # The secret is printed once; the gateway keeps only its id and label.
   mkdir -p ~/.config/simlock/tokens
   token() { (umask 077; simlock --gateway token create --role "$1" --label "$2" | jq -r .secret > ~/.config/simlock/tokens/"$2"); }
@@ -105,16 +102,37 @@ Every machine builds Android; only dev-mbp-14 runs devices.
 
   # dev-mbp-14 (stay logged in at the screen: the LaunchAgent needs a GUI session)
   echo 'env = ["simlock-worker"]' >> ~/.config/mise/miserc.local.toml
-  simlock config set gateway '{"url":"wss://devbox.<tailnet>.ts.net:8443","token":"slk_…","label":"dev-mbp-14"}'
-  for c in stream input agent-device; do simlock config set capabilities.$c.enabled true; done
-  # mise's .bin/agent-device is a wrapper script, which Simlock can't trace to its package.json
-  simlock config set capabilities.agent-device.command ~/.local/share/mise/installs/npm-agent-device/latest/node_modules/agent-device/bin/agent-device.mjs
-  # Two Android cold boots at once on the M1 Pro both miss the 180 s boot timeout
-  simlock config set warmPool.maxConcurrentBoots 1
-  simlock config set android.emulator.gpu host
-  simlock config set update.check false
-  mise bootstrap                 # LaunchAgent
+  mise bootstrap                 # worker settings, LaunchAgent (fails to start until the token is set)
+  # The only setting not in the repo; Simlock refuses it before gateway.url is set
+  simlock config set gateway.token slk_…
+  launchctl kickstart -k gui/$(id -u)/dev.mise.simlock-worker
   ```
+
+  **Settings** live in `home/.simlock/gateway/config.json` (gateway, merged
+  from `mise.linux.toml`) and `home/.simlock/config.json` (worker, merged from
+  `mise.simlock-worker.toml`). `mise bootstrap` merges each into Simlock's own
+  config file as a dotfiles `merge` entry: mise owns those keys and leaves the
+  rest, the worker's token included, alone. To change one, edit the repo file,
+  run `mise bootstrap`, then restart that daemon; a `simlock config set` on an
+  owned key is reverted by the next bootstrap. Why some values are set:
+
+  - `capabilities.agent-device.command` points at the package's script,
+    since mise's `.bin/agent-device` is a wrapper Simlock can't trace to its
+    `package.json`.
+  - `warmPool.maxConcurrentBoots` is 1 because two Android cold boots at once
+    on this M1 Max both miss the 180 s boot timeout.
+  - `update.check` is off on both because Simlock's npm lookup trips on mise's
+    npm wrapper.
+  - `ios.defaultMode` is `slim`. Simlock clones every iOS lease from a stored
+    seed in `~/.simlock/devices/ios/sources`, and in slim mode writes
+    simslim's launchd overrides into the clone before its first boot. A fresh
+    iPhone 17 Pro on iOS 27 comes up at about 3.4 GB instead of 6.9 GB.
+    `ios.slim.categories` leaves out `store` (push, StoreKit), `web`
+    (universal links), `photos` and `pim`. Slim still breaks StoreKit
+    (`icloud` and `other` stop the AMS and Wallet daemons it needs), widgets
+    and Live Activities, and iCloud Keychain; lease with `--mode full` for
+    those. After changing the mode, `simlock warm forget ios <model> 27.0
+    --mode <old>` so the warm pool stops keeping devices of the old mode.
 
   **Upgrading.** The gateway and worker must run the same protocol, so bump
   `npm:simlock` in the global mise config, then on both machines run

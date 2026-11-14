@@ -14,6 +14,14 @@
 # mise's schema has neither: launchd stops the daemon after 20 s, and a device
 # reset cut short is repaired on the next start. Emulators survive a stop
 # anyway, since Simlock detaches them into their own process group.
+#
+# Worker settings live in home/.simlock/config.json and are merged into
+# Simlock's own config at bootstrap: mise owns those keys, and the join token
+# (gateway.token) stays a key only the live file has. The daemon reads the
+# config at start, so restart it after a change (see README).
+[dotfiles]
+"~/.simlock/config.json/repo" = { source = "home/.simlock/config.json", merge = true, template = "tera" }
+
 [bootstrap.macos.launchd.agents.simlock-worker]
 program = "/bin/sh"
 args = ["-c", 'exec "$HOME/.local/bin/mise" exec -- node "$(realpath "$HOME/.local/share/mise/installs/npm-simlock/latest/node_modules/simlock/dist/daemon/main.js")"']

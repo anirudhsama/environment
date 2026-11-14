@@ -1,0 +1,11 @@
+{
+  "capabilities": {
+    "stream": { "enabled": true },
+    "input": { "enabled": true },
+    "agent-device": { "enabled": true }
+  },
+  "lease": {
+    "maxPerRequester": { "ios": 2, "android": 2 }
+  },
+  "update": { "check": false }
+}

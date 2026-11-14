@@ -89,6 +89,9 @@
 "~/.androidrc" = { source = "home/.androidrc.linux", mode = "symlink" }
 "~/.config/systemd/user/t3code.service.d/network.conf" = { source = "home/.config/systemd/user/t3code.service.d/network.conf", mode = "symlink" }
 "~/.config/systemd/user/dev.mise.opencode.service.d/password.conf" = { source = "home/.config/systemd/user/dev.mise.opencode.service.d/password.conf", mode = "symlink" }
+# Simlock gateway settings: mise owns these keys and leaves the rest of the file
+# to Simlock. The daemon reads it at start, so restart the gateway after a change.
+"~/.simlock/gateway/config.json/repo" = { source = "home/.simlock/gateway/config.json", merge = true, permissions = "600" }
 
 # --- 7. systemd user units ---------------------------------------------------
 # mise writes and enables these directly, namespaced as dev.mise.<name>.service.
