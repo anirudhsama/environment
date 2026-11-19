@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "deny": [
+      "WebSearch",
+      "WebFetch"
+    ]
+  },
   "model": "opus",
   "hooks": {
     "SessionStart": [
@@ -19,20 +25,15 @@
   "enabledPlugins": {},
   "extraKnownMarketplaces": {},
   "effortLevel": "high",
-  "tui": "fullscreen",
-  "autoMemoryEnabled": false,
-  "skipDangerousModePermissionPrompt": true,
-  "theme": "dark",
-  "agentPushNotifEnabled": true,
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "high"
     }
   },
-  "permissions": {
-    "deny": [
-      "WebSearch",
-      "WebFetch"
-    ]
-  }
+  "tui": "fullscreen",
+  "autoMemoryEnabled": false,
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark",
+  "agentPushNotifEnabled": true,
+  "switchModelsOnFlag": false
 }
