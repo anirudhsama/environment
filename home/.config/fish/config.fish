@@ -11,6 +11,8 @@ end
 set fish_greeting ""
 
 set -gx EDITOR nvim
+# Turborepo remote cache team; mirrors .bashrc.
+set -gx TURBO_TEAM l8-cones-interactive
 
 # Set vi mode
 set -g fish_key_bindings fish_hybrid_key_bindings

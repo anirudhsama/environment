@@ -1,6 +1,11 @@
 # mise comes from the vendor installer on both platforms.
 export PATH="$HOME/.local/bin:$PATH"
 
+# Turborepo remote cache team (Vercel). The token comes from `turbo login`
+# (~/.config/turborepo/auth.json); the team is set here, not per checkout via
+# `turbo link`, so every worktree gets it. Mirrored in config.fish.
+export TURBO_TEAM="l8-cones-interactive"
+
 # Android SDK and the JDK Gradle runs on. Set here, not only in fish, because
 # agents run commands through `bash -lc`. The same paths are in config.fish,
 # home/.androidrc.{macos,linux} and mise.simlock-worker.toml; change all four.
