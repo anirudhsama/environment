@@ -127,7 +127,9 @@ end
 # fnox shell integration
 if status is-interactive
     if command -q fnox
-        fnox activate fish | source
+        # The hook names fnox by its versioned mise path, which `mise upgrade`
+        # deletes; call it from PATH so running shells keep working.
+        fnox activate fish | string replace -r "'[^']*/fnox' hook-env" 'fnox hook-env' | source
     end
 end
 
