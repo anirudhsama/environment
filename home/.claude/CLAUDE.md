@@ -13,7 +13,7 @@
 
 ## Models
 
-Pick the Claude model and effort for the session and each subagent yourself. fable-5.1 and `xhigh`/`max` effort burn through my Claude limits fastest, so they run only when I ask.
+Pick the Claude model and effort for the session and each subagent yourself. fable-5.2 burns through my Claude limits fastest, so it runs only when I ask. Effort tops out at `high`.
 
-- Reviews of a plan or implementation, when I ask for one: fable-5.1, gpt-6-astra, or gpt-6.1-sol, at `high`.
+- Reviews of a plan or implementation, when I ask for one: fable-5.2, gpt-6-astra, or gpt-6.1-sol, at `high`.
 - Non-Claude models run only when I name them. Codex models go through `delegate_task` inside T3 Code and the Codex CLI everywhere else; read `~/.claude/codex.md` before any CLI call. Set the reasoning effort explicitly either way, since the defaults don't match mine.
