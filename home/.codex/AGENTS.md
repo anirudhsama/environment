@@ -22,9 +22,3 @@ These computers use the `emperor-jazz.ts.net` Tailscale tailnet:
 | Dev Mac, development Mac, old MacBook Pro | `dev-mbp-14.emperor-jazz.ts.net` | `ssh dev-mbp-14` | `~/Documents/code/environment` |
 
 When I assign work to a named machine, run it on that machine in the checkout above. From the primary Mac, use the short SSH target directly. If the session is already running on the target machine, work locally.
-
-## Sideshow Visuals
-
-Use Sideshow by default for visual deliverables: UI mockups, HTML pages, dashboards, charts, diagrams, rendered explanations, presentations, and screenshots. Local Markdown, HTML, SVG, image files, code, or prose stand in only when I explicitly ask for them. If Sideshow is unavailable, say so and ask which fallback I want rather than writing a file.
-
-Explicit requests to implement repository files are exempt; use Sideshow for visual review when relevant.
