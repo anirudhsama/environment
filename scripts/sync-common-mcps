@@ -7,10 +7,8 @@ command -v bunx >/dev/null 2>&1 || {
 }
 
 servers=(
-  "context7|https://mcp.context7.com/mcp/oauth"
-  "deepwiki|https://mcp.deepwiki.com/mcp"
-  "gh_grep|https://mcp.grep.app"
   "exa|https://mcp.exa.ai/mcp?tools=web_search_exa,web_fetch_exa,web_search_advanced_exa"
+  "slack|https://mcp.slack.com/mcp"
 )
 
 sync_agent() {
