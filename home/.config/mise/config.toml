@@ -53,10 +53,18 @@ codex = { version = "latest", auto_update = true }
 # Bare registry names, as Omarchy declares them: T3 Code's Update runs
 # `mise upgrade <name>` only for these names. `opencode` is npm:@opencode/cli,
 # whose registry entry allows its native-binary install script; `grok` and `pi`
-# are native release binaries (http:grok, aqua:earendil-works/pi).
+# are native release binaries (http:grok, aqua:earendil-works/pi). `agy` is
+# Google's Antigravity CLI (aqua:google-antigravity/antigravity-cli), the name
+# T3 Code looks up on PATH.
 opencode = { version = "latest", auto_update = true }
 grok = { version = "latest", auto_update = true }
 pi = { version = "latest", auto_update = true }
+agy = { version = "latest", auto_update = true }
+
+# agy's built-in updater replaces its own binary, which would rewrite mise's
+# install behind its back; mise's auto_update owns upgrades instead.
+[env]
+AGY_CLI_DISABLE_AUTO_UPDATE = "1"
 
 [settings]
 experimental = true
@@ -67,6 +75,7 @@ minimum_release_age_excludes = [
   "opencode",
   "grok",
   "pi",
+  "agy",
 ]
 trusted_config_paths = [
   "/Users/ani/conductor/workspaces",

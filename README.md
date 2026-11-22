@@ -61,7 +61,9 @@ enables `mise self-update`, and mise ships near-daily so every distro lags it.
 
 Claude and Codex use the same mise backends selected by Omarchy. OpenCode 2,
 Grok, and Pi come from npm through mise, because Omarchy's OpenCode backend only
-ships V1. All of them are declared in the tracked global mise config.
+ships V1. Antigravity (`agy`) is Google's native release binary through mise,
+with its self-updater off so mise owns upgrades. All of them are declared in the
+tracked global mise config.
 
 `update` on the devbox refreshes all three.
 
