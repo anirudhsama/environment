@@ -207,7 +207,7 @@ hook once, with `/hooks`). Agents started outside Rex still get the skill.
   ignored. It becomes the default in mise 2027.6.0.
 - `= "latest"` means "newest at install time", not "always newest" — an
   installed version satisfies it. `mise upgrade` is what moves tools forward.
-  The coding agents, eas-cli, vercel, agent-browser and hunk are the exception:
+  The coding agents, eas-cli, vercel, agent-browser, browse and hunk are the exception:
   they set `auto_update`, and the `mise-tool-update` service upgrades them in
   the background once a day. While
   it runs, launches never update in the foreground. `mise bootstrap services
@@ -219,6 +219,11 @@ hook once, with `/hooks`). Agents started outside Rex still get the skill.
   start, so the unit copies a fixed one from `serve.env` into the service
   config before each start. Manual clients use username `opencode` and that
   password.
+- browse (the Chrome extension's MCP server) is Mac-only. Each Mac's agents use
+  that Mac's own Chrome through a local relay; the extension arrives by Chrome
+  Sync, but each Mac pairs once by hand: `browse pair`, then enter the code
+  under the extension's Options → Pairing code. Restart agents after the first
+  `mise bootstrap` so they load the MCP server.
 - The DevboxDrop LaunchAgent stays a hand-written plist: it's `WatchPaths`
   driven and mise's launchd schema has no `WatchPaths`/`ThrottleInterval`.
 - Lean reference clones live in `~/code/references` (effect, opencode, t3code),

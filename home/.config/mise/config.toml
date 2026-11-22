@@ -29,6 +29,11 @@ hasura-cli = "latest"
 "npm:eas-cli" = { version = "latest", auto_update = true }
 "npm:vercel" = { version = "latest", auto_update = true }
 "npm:agent-browser" = { version = "latest", auto_update = true }
+# browse (anomalyco/browse): the MCP server and relay behind the browse Chrome
+# extension, so agents drive the Mac's signed-in Chrome. Macs only: the devbox
+# has no display. Its self-updater doesn't touch a mise install, so
+# auto_update owns upgrades. sync-common-mcps registers it with the agents.
+"npm:@opencode/browse" = { version = "latest", auto_update = true, os = ["macos"] }
 
 # Android CLI: mise installs the launcher, which keeps the real CLI under
 # ~/.android/bin and ~/.android/cli. ~/.androidrc picks the SDK per platform.

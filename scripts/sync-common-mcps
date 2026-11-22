@@ -32,6 +32,18 @@ sync_agent() {
       --agent "$agent" \
       --transport http
   done
+
+  # browse is Mac-only (see the global mise config). Point at the mise shim:
+  # `browse install` would write versioned install paths that break on upgrade.
+  local browse="$HOME/.local/share/mise/shims/browse"
+  if [[ -x "$browse" ]]; then
+    bunx add-mcp "$browse" \
+      --args mcp \
+      --name browse \
+      --global \
+      --yes \
+      --agent "$agent"
+  fi
 }
 
 sync_agent claude-code claude
