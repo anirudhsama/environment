@@ -125,6 +125,13 @@ Every machine builds Android; only dev-mbp-14 runs devices.
     start.
   - `warmPool.maxConcurrentBoots` is 1 because two Android cold boots at once
     on this M1 Max both miss the 180 s boot timeout.
+  - The warm pool keeps one slim iPhone 17 Pro, the model T3 opens by
+    default, and `warmPool.learn` is off. Learning kept six devices warm,
+    which pushed the 32 GB Mac into memory pressure; Simlock then shut them
+    down and booted them again every few minutes.
+  - `capacity.config.ramBudget` charges 7 GiB per full iOS simulator and
+    3.5 GiB per slim one (the sizes below). Simlock's default of 1.5 GiB let
+    it admit far more devices than fit.
   - `update.check` is off on both because Simlock's npm lookup trips on mise's
     npm wrapper.
   - `ios.defaultMode` is `slim`. Simlock clones every iOS lease from a stored

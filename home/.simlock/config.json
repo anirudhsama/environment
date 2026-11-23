@@ -11,7 +11,17 @@
       "command": "{{ env.HOME }}/.simlock/pinned-agent-device/node_modules/agent-device/bin/agent-device.mjs"
     }
   },
-  "warmPool": { "maxConcurrentBoots": 1 },
+  "capacity": {
+    "strategy": "resource",
+    "config": {
+      "ramBudget": { "iosBytesPerDevice": 7516192768, "iosSlimBytesPerDevice": 3758096384 }
+    }
+  },
+  "warmPool": {
+    "maxConcurrentBoots": 1,
+    "learn": false,
+    "targets": [{ "platform": "ios", "model": "iPhone 17 Pro", "mode": "slim", "count": 1 }]
+  },
   "android": { "emulator": { "gpu": "host" } },
   "ios": {
     "defaultMode": "slim",
