@@ -50,8 +50,11 @@ android-cli = { version = "latest", auto_update = true }
 # callstackincubator/simlock.
 "npm:simlock" = { version = "0.8.0", allow_low_downloads = true }
 # The worker's agent-device must be the version T3 pins in
-# apps/server/src/device/deviceToolVersions.json.
-"npm:agent-device" = "0.21.36"
+# apps/server/src/device/deviceToolVersions.json. 0.21.41 speaks RPC
+# protocol 3, which simlock 0.8.0 doesn't support yet, so the worker's
+# install is patched by hand (see README, Simlock, "agent-device ahead of
+# Simlock").
+"npm:agent-device" = "0.21.41"
 
 # Coding agents. Bare mise aliases follow the same backends Omarchy uses; Grok
 # is explicit because that is Omarchy's package choice and xAI's published CLI.

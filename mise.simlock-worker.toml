@@ -3,9 +3,13 @@
 # dev-mbp-14 selects it in ~/.config/mise/miserc.local.toml with
 #   env = ["simlock-worker"]
 #
-# Runs the `latest` simlock through `mise exec`, so a pin bump needs no unit
-# change, only a restart (see README). main.js only starts when argv[1] is its
-# real path, hence the realpath through the install symlinks. The daemon
+# Each start resolves the pinned simlock and agent-device with `mise where`, so
+# a pin bump needs no unit change, only `mise install` and a restart (see
+# README). mise's `latest` symlink follows the newest install, not the pin, so
+# nothing here uses it. Simlock's config names agent-device by a fixed path,
+# so the start points ~/.simlock/pinned-agent-device at the pinned install.
+# main.js only starts when argv[1] is its real path, hence the realpath
+# through the install symlinks. The daemon
 # spawns simctl, adb, the emulator and agent-device, so PATH and the
 # Android/JDK variables mirror home/.bashrc (launchd reads no shell files);
 # mise exec prepends the tool paths.
@@ -24,7 +28,14 @@
 
 [bootstrap.macos.launchd.agents.simlock-worker]
 program = "/bin/sh"
-args = ["-c", 'exec "$HOME/.local/bin/mise" exec -- node "$(realpath "$HOME/.local/share/mise/installs/npm-simlock/latest/node_modules/simlock/dist/daemon/main.js")"']
+args = ["-c", '''
+set -e
+mise="$HOME/.local/bin/mise"
+agent_device=$("$mise" where npm:agent-device)
+simlock=$("$mise" where npm:simlock)
+ln -sfn "$agent_device" "$SIMLOCK_HOME/pinned-agent-device"
+exec "$mise" exec -- node "$(realpath "$simlock/node_modules/simlock/dist/daemon/main.js")"
+''']
 run_at_load = true
 keep_alive_on_failure = true
 throttle_interval = 10

@@ -120,7 +120,9 @@ Every machine builds Android; only dev-mbp-14 runs devices.
 
   - `capabilities.agent-device.command` points at the package's script,
     since mise's `.bin/agent-device` is a wrapper Simlock can't trace to its
-    `package.json`.
+    `package.json`. It goes through `~/.simlock/pinned-agent-device`, which
+    the LaunchAgent points at the pinned install (`mise where`) on every
+    start.
   - `warmPool.maxConcurrentBoots` is 1 because two Android cold boots at once
     on this M1 Max both miss the 180 s boot timeout.
   - `update.check` is off on both because Simlock's npm lookup trips on mise's
@@ -140,9 +142,32 @@ Every machine builds Android; only dev-mbp-14 runs devices.
   `npm:simlock` in the global mise config, then on both machines run
   `mise bootstrap` and restart the daemon: `systemctl --user restart
   dev.mise.simlock-gateway` on the devbox, `launchctl kickstart -k
-  gui/$(id -u)/dev.mise.simlock-worker` on dev-mbp-14. The units run the
-  `latest` install, so nothing restarts them on its own. A restart ends
-  running leases.
+  gui/$(id -u)/dev.mise.simlock-worker` on dev-mbp-14. The units resolve
+  the pinned simlock and agent-device with `mise where` when they start, so
+  a bump takes effect at the restart, and an extra installed version changes
+  nothing. Nothing restarts them on its own. A restart ends running leases.
+
+  **agent-device ahead of Simlock.** T3 Nightly pins agent-device 0.21.41,
+  which speaks daemon RPC protocol 3. Simlock 0.8.0 (the newest release, and
+  upstream `main`) only accepts protocol 2: its worker refuses a protocol-3
+  agent-device, and its bundled `@agent-device/proxy` 0.21.36 reports
+  protocol 2, which T3's client refuses. Until a Simlock release accepts
+  protocol 3, the worker's simlock 0.8.0 install on dev-mbp-14 is patched by
+  hand; the devbox gateway runs stock. In
+  `~/.local/share/mise/installs/npm-simlock/0.8.0/node_modules/.mise/`:
+
+  - `@agent-device+proxy@0.21.36/node_modules/@agent-device/proxy` holds
+    `@agent-device/proxy` 0.21.41's `package.json` and `dist/` (it has no
+    dependencies). The original is in `~/.simlock/proxy-0.21.36.bak`.
+  - `simlock@0.8.0/node_modules/simlock/dist/agent-device/shared/compatibility.js`
+    sets `AGENT_DEVICE_RPC_PROTOCOL_VERSION = 3`. The original is in
+    `~/.simlock/compatibility.js.bak`.
+
+  Reinstalling simlock 0.8.0 drops both patches. Check with `curl -s -H
+  "Authorization: Bearer $(cat ~/.config/simlock/tokens/t3-devbox)"
+  http://127.0.0.1:4700/v1/agent-device/health` on the devbox: the proxy and
+  its upstream should both report `"rpcProtocolVersion":3`. Once a Simlock
+  release accepts protocol 3, bump `npm:simlock` and drop this section.
 
   Token secrets live only in `~/.config/simlock/tokens/<label>` on the devbox
   and where they are used: the worker's `~/.simlock/config.json` and each T3
