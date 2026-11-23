@@ -50,3 +50,30 @@ sync_agent claude-code claude
 sync_agent codex codex
 sync_agent opencode opencode
 sync_agent grok-build grok
+
+# Slack's MCP has no dynamic client registration, so OAuth needs a fixed Slack
+# app client ID. This one is Slack's own Claude Code plugin app; OpenCode
+# borrows it until Slack ships one (slackapi/slack-skills-plugin#15). add-mcp
+# can't write it and drops it on every run, so patch it back in afterwards.
+slack_client_id="1601185624273.8899143856786"
+
+patch_json() {
+  local file="$1" filter="$2" tmp
+  [[ -f "$file" ]] || return 0
+  tmp="$(mktemp)"
+  if jq --arg id "$slack_client_id" "$filter" "$file" >"$tmp"; then
+    cat "$tmp" >"$file"
+  else
+    echo "skipping Slack OAuth patch: couldn't parse $file"
+  fi
+  rm -f "$tmp"
+}
+
+if command -v jq >/dev/null 2>&1; then
+  patch_json "$HOME/.claude.json" \
+    'if .mcpServers.slack then .mcpServers.slack.oauth = {clientId: $id, callbackPort: 3118} else . end'
+  patch_json "${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode.jsonc" \
+    'if .mcp.slack then .mcp.slack.oauth = {clientId: $id, redirectUri: "http://localhost:3118/callback"} else . end'
+else
+  echo "skipping Slack OAuth patch: jq not found"
+fi
